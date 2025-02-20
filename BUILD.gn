@@ -129,7 +129,7 @@ if (is_arkui_x) {
       debug = false
     }
 
-    public_deps = [ ":graphics_effect_src" ]
+    deps = [ ":graphics_effect_src" ]
     external_deps = [
       "bounds_checking_function:libsec_static",
       "hilog:libhilog",
