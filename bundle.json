@@ -19,9 +19,11 @@
       "ram": "",
       "deps": {
         "components": [
+          "c_utils",
+          "graphic_2d",
           "hilog",
           "init",
-          "graphic_2d"
+          "skia"
         ]
       },
       "build": {
