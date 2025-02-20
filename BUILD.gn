@@ -111,7 +111,7 @@ if (is_arkui_x) {
     }
 
     deps = [
-      ":graphics_effect_src"
+      ":graphics_effect_src",
       "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_${target_os}",
       "//third_party/bounds_checking_function:libsec_static",
       "//third_party/skia:skia_$target_os",
