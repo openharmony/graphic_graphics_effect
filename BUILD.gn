@@ -129,6 +129,8 @@ if (is_arkui_x) {
       debug = false
     }
 
+    public_configs = [ ":export_config" ]
+
     deps = [ ":graphics_effect_src" ]
     external_deps = [
       "bounds_checking_function:libsec_static",
