@@ -138,6 +138,7 @@ if (is_arkui_x) {
       "skia:skia_canvaskit",
     ]
 
+    output_name = "graphics_effect"
     part_name = "graphics_effect"
     subsystem_name = "graphic"
   }
