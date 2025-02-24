@@ -44,7 +44,7 @@ ohos_source_set("graphics_effect_src") {
     "-FS",
     "-D_FORTIFY_SOURCE=2",
     "-fvisibility=hidden",
-    "-fvisibility-inline-hidden",
+    "-fvisibility-inlines-hidden",
     "-fdata-sections",
     "-ffunction-sections",
     "-flto",
