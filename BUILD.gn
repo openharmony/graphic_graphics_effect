@@ -37,7 +37,7 @@ ohos_source_set("graphics_effect_src") {
     "-flto",
   ]
   cflags_cc = [
-    "std=c++17",
+    "-std=c++17",
     "-O2",
     "-ftrapv",
     "-FPIC",
