@@ -31,13 +31,23 @@ ohos_source_set("graphics_effect_src") {
     "-FPIC",
     "-FS",
     "-D_FORTIFY_SOURCE=2",
+    "-fvisibility=hidden",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-flto",
   ]
   cflags_cc = [
+    "-std=c++17",
     "-O2",
     "-ftrapv",
     "-FPIC",
     "-FS",
     "-D_FORTIFY_SOURCE=2",
+    "-fvisibility=hidden",
+    "-fvisibility-inlines-hidden",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-flto",
   ]
 
   public_configs = [ ":export_config" ]
@@ -138,6 +148,7 @@ if (is_arkui_x) {
       "skia:skia_canvaskit",
     ]
 
+    output_name = "graphics_effect"
     part_name = "graphics_effect"
     subsystem_name = "graphic"
   }

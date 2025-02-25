@@ -41,7 +41,9 @@
             }
           }
         ],
-        "test": [ ]
+        "test": [
+          "//foundation/graphic/graphics_effect/test:test"
+        ]
       }
     }
   }
