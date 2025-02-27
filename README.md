@@ -12,6 +12,7 @@ Graphics Effect的分层说明如下：
 
 • 实现层：分为GERender、GEVisualEffect、GEVisualEffectContainer三个模块。
 | 模块                            | 能力描述                            |
+|-------------------------------|---------------------------------|
 | GERender（渲染）                  | 提供绘制能力，将GEVisualEffect效果绘制到目标上。 |
 | GEVisualEffect（视效）            | 具体视效能力的实现。                      |
 | GEVisualEffectContainer（视效容器） | 多个视效方便集成。                       |
