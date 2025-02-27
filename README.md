@@ -5,13 +5,18 @@ Graphics Effect是OpenHarmony图形子系统的重要部件，为图形子系统
 
 #### 软件架构
 ![GraphicsEffect架构图](./figures/graphics_effect_architecture.png)
+
 Graphics Effect的分层说明如下：
+
 • 接口层：Graphics Effect通过ArkUI、UIEffect、EffectKit对外开放能力。
+
 • 实现层：分为GERender、GEVisualEffect、GEVisualEffectContainer三个模块。
-  GERender（渲染）：提供绘制能力，将GEVisualEffect效果绘制到目标上。
-  GEVisualEffect（视效）：具体视效能力的实现。
-  GEVisualEffectContainer（视效容器）：多个视效方便集成
-• 引擎封装层：系统提供的2D引擎封装层
+| 模块                            | 能力描述                            |
+| GERender（渲染）                  | 提供绘制能力，将GEVisualEffect效果绘制到目标上。 |
+| GEVisualEffect（视效）            | 具体视效能力的实现。                      |
+| GEVisualEffectContainer（视效容器） | 多个视效方便集成。                       |
+
+• 引擎封装层：系统提供的2D引擎封装层。
 
 #### 安装教程
 
