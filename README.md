@@ -4,7 +4,7 @@
 Graphics_effect是OpenHarmony图形子系统的重要部件，为图形子系统提供必需的动视效算法能力，包括模糊、阴影、渐变、灰阶、提亮、反色、取色等。
 
 #### 软件架构
-软件架构说明
+![GraphicsEffect架构图]（./figures/graphics_effect_architecture.png）
 
 
 #### 安装教程

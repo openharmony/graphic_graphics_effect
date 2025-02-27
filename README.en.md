@@ -4,7 +4,7 @@
 graphics_effect is an important component of OpenHarmony's graphics subsystem, providing the necessary visual effects algorithm capabilities for the graphics subsystem, including blur, shadow, gradient, grayscale, brighten, invert, enhance, etc.
 
 #### Software Architecture
-Software architecture description
+![GraphicsEffectArchitecture]（./figures/graphics_effect_architecture.png）
 
 #### Installation
 
