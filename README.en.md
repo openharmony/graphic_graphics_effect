@@ -5,6 +5,13 @@ graphics_effect is an important component of OpenHarmony's graphics subsystem, p
 
 #### Software Architecture
 ![GraphicsEffectArchitecture](./figures/graphics_effect_architecture.png)
+The layered description of Graphics Effect is as follows:
+• Interface layer: Graphics Effect opens its capabilities to the outside world through ArkUI, UIEffect, and EffectKit.
+• Implementation layer: divided into three modules: GERender, GEVisualEffect, and GEVisualEffectContainer.
+  GERender(rendering): provides drawing capabilities and draws the effects of GEVisualEffect onto the target.
+  GEVisualEffect(visual effect): implementation of specific visual effect capabilities.
+  GEVisualEffectContainer(visual effect container): convenient integration of multiple visual effects.
+• Engine encapsulation layer: encapsulation layerof 2D engine provided by the system.
 
 #### Installation
 
