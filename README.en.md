@@ -19,6 +19,19 @@ The layered description of Graphics Effect is as follows:
 
 • Engine encapsulation layer: encapsulation layerof 2D engine provided by the system.
 
+## Directory structure
+```
+foundation/graphic/graphics_effect/
+├── figures                 # Image directory referenced by Markdown
+├── include                 # Graphics Effect interface storage directory
+│   ├── ext                 # Dynamic loading framework interface and algorithm interface storage directory
+├── src                     # Source code storage directory
+│   ├── ext                 # Dynamic loading framework and algorithm interface implementation storage directory
+└── test                    # Test case storage directory
+    ├── fuzztest            # Fuzz test case storage directory
+    └── unittest            # Unit test case storage directory
+```
+
 ## Installation
 
 Not involved

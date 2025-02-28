@@ -19,6 +19,19 @@ Graphics Effect的分层说明如下：
 
 • 引擎封装层：系统提供的2D引擎封装层。
 
+## 目录结构
+```
+foundation/graphic/graphics_effect/
+├── figures                 # Markdown引用的图片目录
+├── include                 # Graphics Effect接口存放目录
+│   ├── ext                 # 动态加载框架及算法接口存放目录
+├── src                     # 源代码存放目录
+│   ├── ext                 # 动态加载框架及算法接口实现存放目录
+└── test                    # 测试用例存放目录
+    ├── fuzztest            # fuzz用例存放目录
+    └── unittest            # 单元测试用例存放目录
+```
+
 ## 安装教程
 
 不涉及
