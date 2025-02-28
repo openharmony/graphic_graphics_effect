@@ -12,12 +12,10 @@ Graphics Effect的分层说明如下：
 
 • 实现层：分为GERender、GEVisualEffect、GEVisualEffectContainer三个模块。
 | 模块                            | 能力描述                            |
-|-------------------------------|---------------------------------|
-| GERender（渲染）                  | 提供绘制能力，将GEVisualEffect效果绘制到目标上。 |
-| GEVisualEffect（视效）            | 具体视效能力的实现。                      |
-| GEVisualEffectContainer（视效容器） | 多个视效方便集成。                       |
-
-• 引擎封装层：系统提供的2D引擎封装层。
+|-------------------------------|---------------------------------------|
+| GERender（渲染）                  | 提供绘制能力，将GEVisualEffect效果绘制到canvas画布上。 |
+| GEVisualEffect（动视效）            | 具体动视效能力的实现。                          |
+| GEVisualEffectContainer（动视效容器） | 多个动视效方便集成。                           |
 
 ## 目录结构
 ```
@@ -39,3 +37,42 @@ foundation/graphic/graphics_effect/
 ## 使用说明
 
 在桌面、状态栏、控制中心等系统UI场景中已经集成了该部件的能力，用户可直接操作使用并体验相应效果。
+
+### 1.将指定动视效绘制到画布上
+
+以Image为基础，应用GEVisualEffectContainer所包含的动视效，并直接绘制到传入的canvas画布上
+```
+void DrawImageEffect(Drawing::Canvas& canvas, Drawing::GEVisualEffectContainer& veContainer,
+        const std::shared_ptr<Drawing::Image>& image, const Drawing::Rect& src, const Drawing::Rect& dst,
+        const Drawing::SamplingOptions& sampling);
+```
+调用示例：
+```
+  Drawing::Canvas canvas;
+  auto image = std::make_shared<Drawing::Image>();
+  auto visualEffectContainer = std::make_shared<Drawing::GEVisualEffectContainer>();
+  DrawImageRectAttributes attr;
+
+  auto geRender = std::make_shared<GraphicsEffectEngine::GERender>();
+  geRender->DrawImageEffect(canvas, *visualEffectContainer, image, attr.src, attr.src, Drawing::SamplingOptions());
+```
+
+### 2.将指定动视效绘制到画布上并以图片形式返回绘制结果
+
+以Image为基础，应用GEVisualEffectContainer所包含的动视效，并返回新的Image
+```
+std::shared_ptr<Drawing::Image> ApplyImageEffect(Drawing::Canvas& canvas,
+        Drawing::GEVisualEffectContainer& veContainer, const std::shared_ptr<Drawing::Image>& image,
+        const Drawing::Rect& src, const Drawing::Rect& dst, const Drawing::SamplingOptions& sampling);
+```
+调用示例：
+```
+  Drawing::Canvas canvas;
+  auto image = std::make_shared<Drawing::Image>();
+  auto visualEffectContainer = std::make_shared<Drawing::GEVisualEffectContainer>();
+  DrawImageRectAttributes attr;
+
+  auto geRender = std::make_shared<GraphicsEffectEngine::GERender>();
+  auto outImage = geRender->ApplyImageEffect(canvas, *visualEffectContainer, image, attr.src, attr.src, Drawing::SamplingOptions());
+```
+
