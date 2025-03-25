@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/graphic/graphics_effect/config.gni")
 
 module_output_path = "graphics_effect/graphics_effect_core"
 
@@ -42,8 +41,8 @@ ohos_unittest("GraphicsEffectTest") {
   }
 
   include_dirs = [
-    "$graphics_effect_root/include",
-    "$graphics_effect_root/src",
+    "//foundation/graphic/graphics_effect/include",
+    "//foundation/graphic/graphics_effect/src",
   ]
 
   cflags = [
@@ -51,11 +50,15 @@ ohos_unittest("GraphicsEffectTest") {
     "-Dprotected=public",
   ]
 
+  deps = [
+    "//foundation/graphic/graphics_effect:graphics_effect_core",
+  ]
+
   external_deps = [
     "c_utils:utils",
-    "graphic_2d:2d_graphics",
-    "graphics_effect:graphics_effect_core",
     "hilog:libhilog",
+    "googletest:gtest_main",
+    "graphic_2d:2d_graphics",
   ]
 
   part_name = "graphics_effect"

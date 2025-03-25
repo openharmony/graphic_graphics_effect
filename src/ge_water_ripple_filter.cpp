@@ -28,7 +28,6 @@ namespace {
 const int SMALL2MEDIUM_RECV = 0;
 const int SMALL2MEDIUM_SEND = 1;
 const int SMALL2SMALL = 2;
-const int MINI_RECV = 3;
 
 } // namespace
  
@@ -52,10 +51,25 @@ std::shared_ptr<Drawing::Image> GEWaterRippleFilter::ProcessImage(Drawing::Canva
     auto imageInfo = image->GetImageInfo();
     float height = imageInfo.GetHeight();
     float width = imageInfo.GetWidth();
-    if (height < 1e-6 || width < 1e-6) {
-        return nullptr;
+    std::shared_ptr<Drawing::RuntimeEffect> waterRipple;
+    switch (rippleMode_) {
+        case SMALL2MEDIUM_RECV: {
+            waterRipple = GetWaterRippleEffectSM(SMALL2MEDIUM_RECV);
+            break;
+        }
+        case SMALL2MEDIUM_SEND: {
+            waterRipple = GetWaterRippleEffectSM(SMALL2MEDIUM_SEND);
+            break;
+        }
+        case SMALL2SMALL: {
+            waterRipple = GetWaterRippleEffectSS();
+            break;
+        }
+        default: {
+            LOGE("GEWaterRippleFilter::ProcessImage: Not support current ripple mode");
+            return nullptr;
+        }
     }
-    auto waterRipple = GetWaterRippleEffect();
     if (waterRipple == nullptr) {
         LOGE("GEWaterRippleFilter::ProcessImage g_waterRippleEffect init failed");
         return nullptr;
@@ -78,28 +92,6 @@ std::shared_ptr<Drawing::Image> GEWaterRippleFilter::ProcessImage(Drawing::Canva
     return invertedImage;
 }
 
-std::shared_ptr<Drawing::RuntimeEffect> GEWaterRippleFilter::GetWaterRippleEffect()
-{
-    switch (rippleMode_) {
-        case SMALL2MEDIUM_RECV: {
-            return GetWaterRippleEffectSM(SMALL2MEDIUM_RECV);
-        }
-        case SMALL2MEDIUM_SEND: {
-            return GetWaterRippleEffectSM(SMALL2MEDIUM_SEND);
-        }
-        case SMALL2SMALL: {
-            return GetWaterRippleEffectSS();
-        }
-        case MINI_RECV: {
-            return GetWaterRippleEffectMR();
-        }
-        default: {
-            LOGE("GEWaterRippleFilter::ProcessImage: Not support current ripple mode");
-            return nullptr;
-        }
-    }
-}
-
 std::shared_ptr<Drawing::RuntimeEffect> GEWaterRippleFilter::GetWaterRippleEffectSM(const int rippleMode)
 {
     static std::shared_ptr<Drawing::RuntimeEffect> g_waterRippleEffectSM = nullptr;
@@ -118,15 +110,6 @@ std::shared_ptr<Drawing::RuntimeEffect> GEWaterRippleFilter::GetWaterRippleEffec
         g_waterRippleEffectSS = Drawing::RuntimeEffect::CreateForShader(shaderStringSSmutual);
     }
     return g_waterRippleEffectSS;
-}
-
-std::shared_ptr<Drawing::RuntimeEffect> GEWaterRippleFilter::GetWaterRippleEffectMR()
-{
-    static std::shared_ptr<Drawing::RuntimeEffect> g_waterRippleEffectMR = nullptr;
-    if (g_waterRippleEffectMR == nullptr) {
-        g_waterRippleEffectMR = Drawing::RuntimeEffect::CreateForShader(shaderStringMiniRecv);
-    }
-    return g_waterRippleEffectMR;
 }
 
 } // namespace Rosen
