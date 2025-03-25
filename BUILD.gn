@@ -31,7 +31,6 @@ ohos_source_set("graphics_effect_src") {
     "-FPIC",
     "-FS",
     "-D_FORTIFY_SOURCE=2",
-    "-fvisibility=hidden",
     "-fdata-sections",
     "-ffunction-sections",
     "-flto",
@@ -43,7 +42,6 @@ ohos_source_set("graphics_effect_src") {
     "-FPIC",
     "-FS",
     "-D_FORTIFY_SOURCE=2",
-    "-fvisibility=hidden",
     "-fvisibility-inlines-hidden",
     "-fdata-sections",
     "-ffunction-sections",
@@ -51,9 +49,7 @@ ohos_source_set("graphics_effect_src") {
   ]
 
   public_configs = [ ":export_config" ]
-  include_dirs = [
-    "include",
-  ]
+  include_dirs = [ "include" ]
 
   sources = [
     "src/ext/gex_dot_matrix_shader.cpp",
@@ -74,14 +70,13 @@ ohos_source_set("graphics_effect_src") {
     "src/ge_water_ripple_filter.cpp",
   ]
 
-  external_deps = [
-    "graphic_2d:2d_graphics",
-    "c_utils:utils",
-  ]
+  deps = [ ":utils" ]
 
+  external_deps = []
   if (is_arkui_x) {
     deps += [
       "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_${target_os}",
+      "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
       "//third_party/bounds_checking_function:libsec_static",
       "//third_party/skia:skia_$target_os",
     ]
@@ -89,8 +84,8 @@ ohos_source_set("graphics_effect_src") {
   } else {
     external_deps += [
       "bounds_checking_function:libsec_static",
+      "graphic_2d:2d_graphics",
       "hilog:libhilog",
-      "skia:skia_canvaskit",
     ]
   }
 
@@ -124,7 +119,6 @@ if (is_arkui_x) {
       ":graphics_effect_src",
       "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_${target_os}",
       "//third_party/bounds_checking_function:libsec_static",
-      "//third_party/skia:skia_$target_os",
     ]
 
     part_name = "graphics_effect"
@@ -145,7 +139,6 @@ if (is_arkui_x) {
     external_deps = [
       "bounds_checking_function:libsec_static",
       "hilog:libhilog",
-      "skia:skia_canvaskit",
     ]
 
     output_name = "graphics_effect"
@@ -153,3 +146,35 @@ if (is_arkui_x) {
     subsystem_name = "graphic"
   }
 }
+
+# utils {{{
+group("utils") {
+  if (current_os == "ohos") {
+    public_external_deps = [ "c_utils:utils" ]
+  } else if (current_os == "android" || current_os == "ios") {
+    public_external_deps = [ "c_utils:utilsbase" ]
+  } else {
+    public_deps = [ ":mock_utils" ]
+  }
+}
+
+config("utils_config") {
+  include_dirs = [ "src/utils" ]
+}
+
+ohos_source_set("mock_utils") {
+  public_external_deps = []
+  if (current_os == "ios") {
+    public_external_deps += [ "c_utils:utilsbase" ]
+  } else {
+    public_configs = [ ":utils_config" ]
+    sources = [
+      "src/utils/parcel.cpp",
+      "src/utils/refbase.cpp",
+    ]
+    public_external_deps += [ "bounds_checking_function:libsec_shared" ]
+  }
+  part_name = "graphics_effect"
+  subsystem_name = "graphic"
+}
+# utils }}}
