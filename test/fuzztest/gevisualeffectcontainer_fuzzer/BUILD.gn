@@ -14,18 +14,16 @@
 #####################hydra-fuzz###################
 import("//build/config/features.gni")
 import("//build/test.gni")
-import("//foundation/graphic/graphics_effect/config.gni")
 module_out_path = "graphics_effect/graphics_effect_core"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("GEVisualEffectContainerFuzzTest") {
   module_out_path = module_out_path
-  fuzz_config_file =
-      "$graphics_effect_root/test/fuzztest/gevisualeffectcontainer_fuzzer"
+  fuzz_config_file = "//foundation/graphic/graphics_effect/test/fuzztest/gevisualeffectcontainer_fuzzer"
 
   include_dirs = [
-    "$graphics_effect_root/src",
-    "$graphics_effect_root/test/fuzztest/",
+    "//foundation/graphic/graphics_effect/src",
+    "//foundation/graphic/graphics_effect/test/fuzztest/",
   ]
 
   sources = [
@@ -40,9 +38,12 @@ ohos_fuzztest("GEVisualEffectContainerFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
 
+  deps = [
+    "//foundation/graphic/graphics_effect:graphics_effect_core",
+  ]
+
   external_deps = [
     "graphic_2d:2d_graphics",
-    "graphics_effect:graphics_effect_core",
   ]
 
   part_name = "graphics_effect"
