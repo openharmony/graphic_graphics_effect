@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/graphic/graphics_effect/config.gni")
 
-module_output_path = "graphics_effect/graphics_effect_core"
+module_output_path = "graphics_effect/effect_process"
 
 ohos_unittest("GraphicsEffectTest") {
   module_out_path = module_output_path

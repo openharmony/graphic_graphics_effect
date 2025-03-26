@@ -15,7 +15,7 @@
 import("//build/config/features.gni")
 import("//build/test.gni")
 import("//foundation/graphic/graphics_effect/config.gni")
-module_out_path = "graphics_effect/graphics_effect_core"
+module_out_path = "graphics_effect/effect_process"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("GEMesaBlurShaderFilterFuzzTest") {
