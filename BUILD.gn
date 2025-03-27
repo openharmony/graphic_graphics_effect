@@ -34,7 +34,6 @@ ohos_source_set("graphics_effect_src") {
     "-D_FORTIFY_SOURCE=2",
     "-fdata-sections",
     "-ffunction-sections",
-    "-flto",
   ]
   cflags_cc = [
     "-std=c++17",
@@ -46,7 +45,6 @@ ohos_source_set("graphics_effect_src") {
     "-fvisibility-inlines-hidden",
     "-fdata-sections",
     "-ffunction-sections",
-    "-flto",
   ]
 
   public_configs = [ ":export_config" ]
