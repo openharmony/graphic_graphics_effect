@@ -38,6 +38,7 @@ public:
 
     std::shared_ptr<Drawing::Image> ProcessImage(Drawing::Canvas& canvas, const std::shared_ptr<Drawing::Image> image,
         const Drawing::Rect& src, const Drawing::Rect& dst) override;
+    static void SetMesaModeByCCM(int mode);
 
 protected:
     struct NewBlurParams {
@@ -107,6 +108,7 @@ protected:
     Drawing::TileMode tileMode_ = Drawing::TileMode::CLAMP;
     float width_ = 0.0f;
     float height_ = 0.0f;
+    static int g_isSimpleX;
 
 private:
     bool InitBlurEffect();

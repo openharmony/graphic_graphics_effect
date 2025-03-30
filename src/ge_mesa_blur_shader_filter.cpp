@@ -26,6 +26,13 @@
 namespace OHOS {
 namespace Rosen {
 #define PROPERTY_KAWASE_ORIGINAL_IMAGE "persist.sys.graphic.kawaseOriginalEnable"
+#define PROPERTY_SIMPLIFIED_MESA_ENABLED "persist.sys.graphic.simplifiedMesaEnable"
+#ifdef GE_OHOS
+int GEMESABlurShaderFilter::g_isSimpleX = (std::atoi(
+    GESystemProperties::GetEventProperty(PROPERTY_SIMPLIFIED_MESA_ENABLED).c_str()));
+#else
+int GEMESABlurShaderFilter::g_isSimpleX = 0;
+#endif
 
 namespace {
 static constexpr float BASE_BLUR_SCALE = 0.5f; // 0.5: base downSample radio
@@ -123,6 +130,11 @@ GEMESABlurShaderFilter::GEMESABlurShaderFilter(const Drawing::GEMESABlurShaderFi
             return;
         }
     }
+}
+
+void GEMESABlurShaderFilter::SetMesaModeByCCM(int mode)
+{
+    g_isSimpleX = std::max(g_isSimpleX, mode);
 }
 
 bool GEMESABlurShaderFilter::SetBlurParams(NewBlurParams& bParam)
@@ -310,6 +322,9 @@ std::shared_ptr<Drawing::ShaderEffect> GEMESABlurShaderFilter::ApplyFuzedFilter(
 #else
     tmpBlur = simpleBlurBuilder.MakeImage(nullptr, nullptr, scaledInfo, false);
 #endif
+    if (!tmpBlur) {
+        return nullptr;
+    }
     return Drawing::ShaderEffect::CreateImageShader(*tmpBlur,
         Drawing::TileMode::CLAMP, Drawing::TileMode::CLAMP, linear, Drawing::Matrix());
 }
@@ -464,6 +479,9 @@ std::shared_ptr<Drawing::Image> GEMESABlurShaderFilter::PingPongBlur(Drawing::Ca
 #else
         tmpBlur = blurBuilder.MakeImage(nullptr, nullptr, scaledInfo, false);
 #endif
+        if (!tmpBlur) {
+            return nullptr;
+        }
     }
     return tmpBlur;
 }
@@ -514,6 +532,10 @@ std::shared_ptr<Drawing::Image> GEMESABlurShaderFilter::ProcessImage(Drawing::Ca
     // Step3. Blur iteration.
     Drawing::RuntimeShaderBuilder simpleBlurBuilder(g_simpleFilter);
     tmpBlur = PingPongBlur(canvas, blurBuilder, simpleBlurBuilder, tmpBlur, input, scaledInfo, linear, blur);
+    if (!tmpBlur) {
+        LOGE("GEMESABlurShaderFilter::ProcessImage make image error in PingPongBlur");
+        return image;
+    }
 
     // Step4. Upsampling and adding random noise.
     auto output = ScaleAndAddRandomColor(canvas, input, tmpBlur, src, dst, width, height);

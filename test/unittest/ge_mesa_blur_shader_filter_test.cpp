@@ -241,5 +241,19 @@ HWTEST_F(GEMESABlurShaderFilterTest, ScaleAndAddRandomColor001, TestSize.Level1)
     EXPECT_NE(filter2->ScaleAndAddRandomColor(canvas_, image_, imageBlur, src_, dst_, width, height), image_);
 }
 
+/**
+ * @tc.name: SetMesaModeByCCM001
+ * @tc.desc: Verify function SetMesaModeByCCM
+ * @tc.type:FUNC
+ */
+HWTEST_F(GEMESABlurShaderFilterTest, SetMesaModeByCCM001, TestSize.Level1)
+{
+    int num = GEMESABlurShaderFilter::g_isSimpleX;
+    for (int mode = 0; mode < 4; mode++) {
+        GEMESABlurShaderFilter::SetMesaModeByCCM(mode);
+        EXPECT_EQ(GEMESABlurShaderFilter::g_isSimpleX, std::max(mode, num));
+        GEMESABlurShaderFilter::SetMesaModeByCCM(num);
+    }
+}
 } // namespace GraphicsEffectEngine
 } // namespace OHOS
