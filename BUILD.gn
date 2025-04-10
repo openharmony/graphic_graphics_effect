@@ -82,7 +82,7 @@ ohos_source_set("graphics_effect_src") {
     external_deps += [ "hilog:libhilog" ]
   } else {
     external_deps += [
-      "bounds_checking_function:libsec_static",
+      "bounds_checking_function:libsec_shared",
       "graphic_2d:2d_graphics",
       "hilog:libhilog",
     ]
@@ -134,7 +134,7 @@ if (is_arkui_x) {
 
     deps = [ ":graphics_effect_src" ]
     external_deps = [
-      "bounds_checking_function:libsec_static",
+      "bounds_checking_function:libsec_shared",
       "hilog:libhilog",
     ]
 
@@ -156,21 +156,16 @@ group("utils") {
 }
 
 config("utils_config") {
-  include_dirs = [ "src/utils" ]
+  include_dirs = [ "src/platform/mock" ]
 }
 
 ohos_source_set("mock_utils") {
-  public_external_deps = []
-  if (current_os == "ios") {
-    public_external_deps += [ "c_utils:utilsbase" ]
-  } else {
-    public_configs = [ ":utils_config" ]
-    sources = [
-      "src/utils/parcel.cpp",
-      "src/utils/refbase.cpp",
-    ]
-    public_external_deps += [ "bounds_checking_function:libsec_shared" ]
-  }
+  public_configs = [ ":utils_config" ]
+  sources = [
+    "src/platform/mock/parcel.cpp",
+    "src/platform/mock/refbase.cpp",
+  ]
+  public_external_deps = [ "bounds_checking_function:libsec_shared" ]
   part_name = "graphics_effect"
   subsystem_name = "graphic"
 }
