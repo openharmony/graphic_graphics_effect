@@ -44,7 +44,6 @@ public:
         const GEGradientDirection direction, const bool maskLinearBlurEnabled)
         : blurRadius_(blurRadius), fractionStops_(fractionStops), direction_(direction)
     {
-        isRadiusGradient_ = false;
         if (maskLinearBlurEnabled) {
             auto kawaseParams = std::make_shared<Drawing::GEKawaseBlurShaderFilterParams>();
             kawaseParams->radius = blurRadius_ / 2; // 2: experience factor
@@ -59,7 +58,7 @@ public:
     std::vector<std::pair<float, float>> fractionStops_;
     GEGradientDirection direction_;
     std::shared_ptr<GEShaderFilter> linearGradientBlurFilter_;
-    bool isRadiusGradient_;
+    bool isRadiusGradient_ = false;
 };
 
 } // namespace Rosen
