@@ -558,7 +558,7 @@ HWTEST_F(GELinearGradientBlurShaderFilterTest, DrawMeanLinearGradientBlur001, Te
     ASSERT_TRUE(filter != nullptr);
     // test DrawMeanLinearGradientBlur with invalid imageScale
     GELinearGradientBlurShaderFilter::imageScale_ = 0.f;
-    float radius = filter->linearGradientBlurPara_->blurRadius_ - GELinearGradientBlurPara::ORIGINAL_BASE;
+    float radius = filter->linearGradientBlurPara_->blurRadius_;
     radius = std::clamp(radius, 0.0f, 60.0f); // 60.0 represents largest blur radius
     radius = radius / 2 * GELinearGradientBlurShaderFilter::imageScale_;        // 2 half blur radius
     
@@ -593,7 +593,7 @@ HWTEST_F(GELinearGradientBlurShaderFilterTest, MakeAlphaGradientShader001, TestS
     ASSERT_TRUE(filter != nullptr);
 
     filter->isOffscreenCanvas_ = false;
-    filter->ComputeScale(dst_.GetWidth(), dst_.GetHeight(), filter->linearGradientBlurPara_->useMaskAlgorithm_);
+    filter->ComputeScale(dst_.GetWidth(), dst_.GetHeight(), !filter->linearGradientBlurPara_->isRadiusGradient_);
     auto clipIPadding = Drawing::Rect(0, 0, filter->geoWidth_ * filter->imageScale_,
         filter->geoHeight_ * filter->imageScale_);
     uint8_t directionBias = 1;

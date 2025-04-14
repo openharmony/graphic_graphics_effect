@@ -40,19 +40,12 @@ enum class GEGradientDirection {
 
 class GELinearGradientBlurPara {
 public:
-    static constexpr float ORIGINAL_BASE = 1000.0f; // 1000.0f represents original radius_base
-
     explicit GELinearGradientBlurPara(const float blurRadius, const std::vector<std::pair<float, float>> fractionStops,
         const GEGradientDirection direction, const bool maskLinearBlurEnabled)
         : blurRadius_(blurRadius), fractionStops_(fractionStops), direction_(direction)
     {
-        if (blurRadius > ORIGINAL_BASE) {
-            useMaskAlgorithm_ = false;
-        } else {
-            useMaskAlgorithm_ = true;
-        }
-
-        if (maskLinearBlurEnabled && useMaskAlgorithm_) {
+        isRadiusGradient_ = false;
+        if (maskLinearBlurEnabled) {
             auto kawaseParams = std::make_shared<Drawing::GEKawaseBlurShaderFilterParams>();
             kawaseParams->radius = blurRadius_ / 2; // 2: experience factor
             linearGradientBlurFilter_ = std::make_shared<GEKawaseBlurShaderFilter>(*kawaseParams);
@@ -66,7 +59,7 @@ public:
     std::vector<std::pair<float, float>> fractionStops_;
     GEGradientDirection direction_;
     std::shared_ptr<GEShaderFilter> linearGradientBlurFilter_;
-    bool useMaskAlgorithm_;
+    bool isRadiusGradient_;
 };
 
 } // namespace Rosen
