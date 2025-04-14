@@ -139,6 +139,9 @@ void GEVisualEffectImpl::SetParam(const std::string& tag, bool param)
             if (tag == GE_FILTER_LINEAR_GRADIENT_BLUR_IS_OFF_SCREEN) {
                 linearGradientBlurParams_->isOffscreenCanvas = param;
             }
+            if (tag == GE_FILTER_LINEAR_GRADIENT_BLUR_IS_RADIUS_GRADIENT) {
+                linearGradientBlurParams_->isRadiusGradient = param;
+            } 
             break;
         }
         default:

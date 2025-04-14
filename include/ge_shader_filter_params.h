@@ -101,6 +101,7 @@ constexpr char GE_FILTER_LINEAR_GRADIENT_BLUR_GEO_WIDTH[] = "GEOWIDTH";
 constexpr char GE_FILTER_LINEAR_GRADIENT_BLUR_GEO_HEIGHT[] = "GEOHEIGHT";
 constexpr char GE_FILTER_LINEAR_GRADIENT_BLUR_TRAN_X[] = "TRANX";
 constexpr char GE_FILTER_LINEAR_GRADIENT_BLUR_TRAN_Y[] = "TRANY";
+constexpr char GE_FILTER_LINEAR_GRADIENT_BLUR_IS_RADIUS_GRADIENT[] = "ISRADIUSGRADIENT";
 struct GELinearGradientBlurShaderFilterParams {
     float blurRadius;
     std::vector<std::pair<float, float>> fractionStops;
@@ -111,6 +112,7 @@ struct GELinearGradientBlurShaderFilterParams {
     float tranX;
     float tranY;
     bool isOffscreenCanvas;
+    bool isRadiusGradient_;
 };
 
 constexpr char GE_FILTER_MAGNIFIER[] = "MAGNIFIER";
