@@ -87,15 +87,17 @@ std::shared_ptr<GEShaderFilter> GERender::GenerateExtShaderFilter(
         }
         case Drawing::GEVisualEffectImpl::FilterType::LINEAR_GRADIENT_BLUR: {
             const auto& linearGradientBlurParams = ve->GetLinearGradientBlurParams();
-            auto object = GEExternalDynamicLoader::GetInstance().CreateGEXObjectByType(
-                static_cast<uint32_t>(type), sizeof(Drawing::GELinearGradientBlurShaderFilterParams),
-                static_cast<void*>(linearGradientBlurParams.get()));
-            if (!object) {
-                return std::make_shared<GELinearGradientBlurShaderFilter>(*linearGradientBlurParams);
+            if (linearGradientBlurParams->isRadiusGradient) {
+                auto object = GEExternalDynamicLoader::GetInstance().CreateGEXObjectByType(
+                    static_cast<uint32_t>(type), sizeof(Drawing::GELinearGradientBlurShaderFilterParams),
+                    static_cast<void*>(linearGradientBlurParams.get()));
+                if (object) {
+                    std::shared_ptr<GELinearGradientBlurShaderFilter>
+                        dmShader(static_cast<GELinearGradientBlurShaderFilter*>(object));
+                    return dmShader;
+                }
             }
-            std::shared_ptr<GELinearGradientBlurShaderFilter>
-                dmShader(static_cast<GELinearGradientBlurShaderFilter*>(object));
-            return dmShader;
+            return std::make_shared<GELinearGradientBlurShaderFilter>(*linearGradientBlurParams);
         }
         default:
             break;

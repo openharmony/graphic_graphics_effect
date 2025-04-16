@@ -41,6 +41,7 @@ static bool GetMaskLinearBlurEnabled()
 std::shared_ptr<Drawing::RuntimeEffect> GELinearGradientBlurShaderFilter::horizontalMeanBlurShaderEffect_ = nullptr;
 std::shared_ptr<Drawing::RuntimeEffect> GELinearGradientBlurShaderFilter::verticalMeanBlurShaderEffect_ = nullptr;
 std::shared_ptr<Drawing::RuntimeEffect> GELinearGradientBlurShaderFilter::maskBlurShaderEffect_ = nullptr;
+std::shared_ptr<Drawing::RuntimeEffect> GELinearGradientBlurShaderFilter::textureShaderEffect_ = nullptr;
 
 GELinearGradientBlurShaderFilter::GELinearGradientBlurShaderFilter(
     const Drawing::GELinearGradientBlurShaderFilterParams& params)
@@ -50,6 +51,7 @@ GELinearGradientBlurShaderFilter::GELinearGradientBlurShaderFilter(
     auto maskLinearBlur = GetMaskLinearBlurEnabled();
     linearGradientBlurPara_ = std::make_shared<GELinearGradientBlurPara>(
         params.blurRadius, params.fractionStops, static_cast<GEGradientDirection>(params.direction), maskLinearBlur);
+    linearGradientBlurPara_->isRadiusGradient_ = params.isRadiusGradient;
     mat_ = params.mat;
     tranX_ = params.tranX;
     tranY_ = params.tranY;
@@ -68,11 +70,10 @@ std::shared_ptr<Drawing::Image> GELinearGradientBlurShaderFilter::ProcessImageDD
     Drawing::Brush brush;
     Drawing::Filter imageFilter;
     Drawing::GradientBlurType blurType;
-    if (GetMaskLinearBlurEnabled() && para->useMaskAlgorithm_) {
+    if (GetMaskLinearBlurEnabled() && !para->isRadiusGradient_) {
         blurType = Drawing::GradientBlurType::ALPHA_BLEND;
         radius /= 2; // 2: half radius.
     } else {
-        radius -= GELinearGradientBlurPara::ORIGINAL_BASE;
         radius = std::clamp(radius, 0.0f, 60.0f); // 60.0 represents largest blur radius
         blurType = Drawing::GradientBlurType::RADIUS_GRADIENT;
     }
@@ -99,7 +100,7 @@ std::shared_ptr<Drawing::Image> GELinearGradientBlurShaderFilter::ProcessImage(D
     LOGD("GELinearGradientBlurShaderFilter::DrawImageRect%{public}f,  %{public}f, %{public}f, %{public}f, %{public}f "
          "%{public}d", para->blurRadius_, geoWidth_, geoHeight_, tranX_, tranY_, (int)isOffscreenCanvas_);
 
-    ComputeScale(dst.GetWidth(), dst.GetHeight(), para->useMaskAlgorithm_);
+    ComputeScale(dst.GetWidth(), dst.GetHeight(), !para->isRadiusGradient_);
     auto clipIPadding = Drawing::Rect(0, 0, geoWidth_ * imageScale_, geoHeight_ * imageScale_);
     uint8_t directionBias = 0;
     auto alphaGradientShader = MakeAlphaGradientShader(clipIPadding, para, directionBias);
@@ -108,7 +109,7 @@ std::shared_ptr<Drawing::Image> GELinearGradientBlurShaderFilter::ProcessImage(D
         return image;
     }
 
-    if (GetMaskLinearBlurEnabled() && para->useMaskAlgorithm_) {
+    if (GetMaskLinearBlurEnabled() && !para->isRadiusGradient_) {
         // use faster LinearGradientBlur if valid
         if (para->linearGradientBlurFilter_ == nullptr) {
             LOGE("RSPropertiesPainter::DrawLinearGradientBlur blurFilter null");
@@ -120,13 +121,12 @@ std::shared_ptr<Drawing::Image> GELinearGradientBlurShaderFilter::ProcessImage(D
         return DrawMaskLinearGradientBlur(image, canvas, filter, alphaGradientShader, dst);
     } else {
         // use original LinearGradientBlur
-        float radius = para->blurRadius_ - GELinearGradientBlurPara::ORIGINAL_BASE;
-        radius = std::clamp(radius, 0.0f, 60.0f); // 60.0 represents largest blur radius
+        float radius = std::clamp(para->blurRadius_, 0.0f, 60.0f); // 60.0 represents largest blur radius
         radius = radius / 2 * imageScale_;        // 2 half blur radius
         MakeHorizontalMeanBlurEffect();
         MakeVerticalMeanBlurEffect();
-        DrawMeanLinearGradientBlur(image, canvas, radius, alphaGradientShader, dst);
-        return image;
+        MakeTextureShaderEffect();
+        return DrawMeanLinearGradientBlur(image, canvas, radius, alphaGradientShader, dst);
     }
 }
 
@@ -293,6 +293,20 @@ std::shared_ptr<Drawing::ShaderEffect> GELinearGradientBlurShaderFilter::MakeAlp
     return Drawing::ShaderEffect::CreateLinearGradient(pts[0], pts[1], c, p, Drawing::TileMode::CLAMP);
 }
 
+void GELinearGradientBlurShaderFilter::MakeTextureShaderEffect()
+{
+    static const std::string generateTextureShader(R"(
+        uniform shader imageInput;
+        half4 main(float2 xy) {
+            return imageInput.eval(xy);
+        }
+    )");
+ 
+    if (textureShaderEffect_ == nullptr) {
+        textureShaderEffect_ = Drawing::RuntimeEffect::CreateForShader(generateTextureShader);
+    }
+}
+
 void GELinearGradientBlurShaderFilter::MakeHorizontalMeanBlurEffect()
 {
     static const std::string HorizontalBlurString(
@@ -367,16 +381,16 @@ void GELinearGradientBlurShaderFilter::MakeVerticalMeanBlurEffect()
     }
 }
 
-void GELinearGradientBlurShaderFilter::DrawMeanLinearGradientBlur(const std::shared_ptr<Drawing::Image>& image,
-    Drawing::Canvas& canvas, float radius, std::shared_ptr<Drawing::ShaderEffect> alphaGradientShader,
-    const Drawing::Rect& dst)
+std::shared_ptr<Drawing::Image> GELinearGradientBlurShaderFilter::DrawMeanLinearGradientBlur(
+    const std::shared_ptr<Drawing::Image>& image, Drawing::Canvas& canvas, float radius,
+    std::shared_ptr<Drawing::ShaderEffect> alphaGradientShader, const Drawing::Rect& dst)
 {
     if (!horizontalMeanBlurShaderEffect_ || !verticalMeanBlurShaderEffect_ || !image) {
-        return;
+        return image;
     }
 
     if (imageScale_ < 1e-6) {
-        return;
+        return image;
     }
 
     Drawing::Matrix m;
@@ -394,11 +408,16 @@ void GELinearGradientBlurShaderFilter::DrawMeanLinearGradientBlur(const std::sha
     auto blurShader = Drawing::ShaderEffect::CreateImageShader(
         *tmpBlur4, Drawing::TileMode::CLAMP, Drawing::TileMode::CLAMP, linear, invBlurMatrix);
 
-    Drawing::Brush brush;
-    brush.SetShaderEffect(blurShader);
-    canvas.AttachBrush(brush);
-    canvas.DrawRect(dst);
-    canvas.DetachBrush();
+    Drawing::RuntimeShaderBuilder builder(textureShaderEffect_);
+    builder.SetChild("imageInput", blurShader);
+    auto imageInfo = Drawing::ImageInfo(dst.GetWidth(), dst.GetHeight(), image->GetImageInfo().GetColorType(),
+        image->GetImageInfo().GetAlphaType(), image->GetImageInfo().GetColorSpace());
+    auto blurImage = builder.MakeImage(canvas.GetGPUContext().get(), nullptr, imageInfo, false);
+    if (!blurImage) {
+        LOGE("GELinearGradientBlurShaderFilter::DrawMeanLinearGradientBlur fail to make final image");
+        return image;
+    }
+    return blurImage;
 }
 
 std::shared_ptr<Drawing::Image> GELinearGradientBlurShaderFilter::BuildMeanLinearGradientBlur(
@@ -424,6 +443,10 @@ std::shared_ptr<Drawing::Image> GELinearGradientBlurShaderFilter::BuildMeanLinea
 #else
         hBlurBuilder.MakeImage(nullptr, nullptr, scaledInfo, false));
 #endif
+    if (!tmpBlur) {
+        LOGE("GELinearGradientBlurShaderFilter::BuildMeanLinearGradientBlur fail to make horizontal blur image1");
+        return image;
+    }
 
     Drawing::RuntimeShaderBuilder vBlurBuilder(verticalMeanBlurShaderEffect_);
     vBlurBuilder.SetUniform("r", radius);
@@ -437,6 +460,10 @@ std::shared_ptr<Drawing::Image> GELinearGradientBlurShaderFilter::BuildMeanLinea
 #else
         vBlurBuilder.MakeImage(nullptr, nullptr, scaledInfo, false));
 #endif
+    if (!tmpBlur2) {
+        LOGE("GELinearGradientBlurShaderFilter::BuildMeanLinearGradientBlur fail to make vertical blur image1");
+        return image;
+    }
 
     auto tmpBlur2Shader = Drawing::ShaderEffect::CreateImageShader(
         *tmpBlur2, Drawing::TileMode::CLAMP, Drawing::TileMode::CLAMP, linear, m);
@@ -447,6 +474,10 @@ std::shared_ptr<Drawing::Image> GELinearGradientBlurShaderFilter::BuildMeanLinea
 #else
         hBlurBuilder.MakeImage(nullptr, nullptr, scaledInfo, false));
 #endif
+    if (!tmpBlur3) {
+        LOGE("GELinearGradientBlurShaderFilter::BuildMeanLinearGradientBlur fail to make horizontal blur image2");
+        return image;
+    }
 
     auto tmpBlur3Shader = Drawing::ShaderEffect::CreateImageShader(
         *tmpBlur3, Drawing::TileMode::CLAMP, Drawing::TileMode::CLAMP, linear, m);
@@ -457,6 +488,10 @@ std::shared_ptr<Drawing::Image> GELinearGradientBlurShaderFilter::BuildMeanLinea
 #else
         vBlurBuilder.MakeImage(nullptr, nullptr, scaledInfo, false));
 #endif
+    if (!tmpBlur4) {
+        LOGE("GELinearGradientBlurShaderFilter::BuildMeanLinearGradientBlur fail to make vertical blur image2");
+        return image;
+    }
     return tmpBlur4;
 }
 
@@ -493,7 +528,10 @@ std::shared_ptr<Drawing::Image> GELinearGradientBlurShaderFilter::DrawMaskLinear
 #else
     auto outImage = builder->MakeImage(nullptr, nullptr, outImageInfo, false);
 #endif
-
+    if (!outImage) {
+        LOGE("GELinearGradientBlurShaderFilter::DrawMaskLinearGradientBlur fail to make gradient blur image");
+        return image;
+    }
     return outImage;
 }
 
@@ -506,28 +544,15 @@ std::shared_ptr<Drawing::RuntimeShaderBuilder> GELinearGradientBlurShaderFilter:
             uniform shader srcImageShader;
             uniform shader blurImageShader;
             uniform shader gradientShader;
-            half4 meanFilter(float2 coord)
-            {
-                vec3 srcColor = vec3(srcImageShader.eval(coord).r,
-                    srcImageShader.eval(coord).g, srcImageShader.eval(coord).b);
-                vec3 blurColor = vec3(blurImageShader.eval(coord).r,
-                    blurImageShader.eval(coord).g, blurImageShader.eval(coord).b);
-                float gradient = gradientShader.eval(coord).a;
 
-                vec3 color = blurColor * gradient + srcColor * (1 - gradient);
-                return vec4(color, 1.0);
-            }
             half4 main(float2 coord)
             {
-                if (abs(gradientShader.eval(coord).a) < 0.001) {
-                    return srcImageShader.eval(coord);
-                }
+                vec3 srcColor = srcImageShader.eval(coord).rgb;
+                vec3 blurColor = blurImageShader.eval(coord).rgb;
+                float gradient = gradientShader.eval(coord).a;
 
-                if (abs(gradientShader.eval(coord).a) > 0.999) {
-                    return blurImageShader.eval(coord);
-                }
-
-                return meanFilter(coord);
+                vec3 color = blurColor * gradient + srcColor * (1.0 - gradient);
+                return vec4(color, 1.0);
             }
         )";
         maskBlurShaderEffect_ = Drawing::RuntimeEffect::CreateForShader(prog);
