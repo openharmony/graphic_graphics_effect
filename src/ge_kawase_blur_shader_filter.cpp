@@ -157,6 +157,10 @@ std::shared_ptr<Drawing::ShaderEffect> GEKawaseBlurShaderFilter::ApplySimpleFilt
 #else
     std::shared_ptr<Drawing::Image> tmpSimpleBlur(simpleBlurBuilder.MakeImage(nullptr, nullptr, scaledInfo, false));
 #endif
+    if (tmpSimpleBlur == nullptr) {
+        LOGE("GEKawaseBlurShaderFilter::ApplySimpleFilter tmpSimpleBlur is nullptr");
+        return nullptr;
+    }
     return Drawing::ShaderEffect::CreateImageShader(*tmpSimpleBlur, Drawing::TileMode::CLAMP, Drawing::TileMode::CLAMP,
         linear, Drawing::Matrix());
 }
