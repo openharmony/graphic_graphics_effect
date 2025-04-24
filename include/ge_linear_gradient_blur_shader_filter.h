@@ -28,16 +28,16 @@ namespace OHOS {
 namespace Rosen {
 class GELinearGradientBlurShaderFilter : public GEShaderFilter {
 public:
-    GELinearGradientBlurShaderFilter(const Drawing::GELinearGradientBlurShaderFilterParams& params);
+    GE_EXPORT GELinearGradientBlurShaderFilter(const Drawing::GELinearGradientBlurShaderFilterParams& params);
     GELinearGradientBlurShaderFilter(const GELinearGradientBlurShaderFilter&) = delete;
     GELinearGradientBlurShaderFilter operator=(const GELinearGradientBlurShaderFilter&) = delete;
     ~GELinearGradientBlurShaderFilter() override = default;
 
-    virtual std::shared_ptr<Drawing::Image> ProcessImage(Drawing::Canvas& canvas,
+    virtual GE_EXPORT std::shared_ptr<Drawing::Image> ProcessImage(Drawing::Canvas& canvas,
         const std::shared_ptr<Drawing::Image> image, const Drawing::Rect& src, const Drawing::Rect& dst) override;
 
-    std::string GetDescription();
-    std::string GetDetailedDescription();
+    GE_EXPORT std::string GetDescription();
+    GE_EXPORT std::string GetDetailedDescription();
     void SetBoundsGeometry(float geoWidth, float geoHeight)
     {
         geoWidth_ = geoWidth;
@@ -77,7 +77,7 @@ private:
     static std::shared_ptr<Drawing::Image> DrawMeanLinearGradientBlur(const std::shared_ptr<Drawing::Image>& image,
         Drawing::Canvas& canvas, float radius, std::shared_ptr<Drawing::ShaderEffect> alphaGradientShader,
         const Drawing::Rect& dst);
-    std::shared_ptr<Drawing::Image> ProcessImageDDGR(
+    GE_EXPORT std::shared_ptr<Drawing::Image> ProcessImageDDGR(
         Drawing::Canvas& canvas, const std::shared_ptr<Drawing::Image> image, uint8_t directionBias);
     static std::shared_ptr<Drawing::Image> BuildMeanLinearGradientBlur(const std::shared_ptr<Drawing::Image>& image,
         Drawing::Canvas& canvas, float radius, std::shared_ptr<Drawing::ShaderEffect> alphaGradientShader,

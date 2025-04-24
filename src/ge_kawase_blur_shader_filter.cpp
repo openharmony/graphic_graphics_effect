@@ -82,7 +82,8 @@ static bool GetKawaseOriginalEnabled()
 #endif
 }
 
-static void getNormalizedOffset(SkV2* offsets, const uint32_t offsetCount, const OffsetInfo& offsetInfo)
+void GEKawaseBlurShaderFilter::GetNormalizedOffset(
+    SkV2* offsets, const uint32_t offsetCount, const OffsetInfo &offsetInfo)
 {
     if (offsets == nullptr || offsetCount != BLUR_SAMPLE_COUNT) {
         LOGE("%s: Invalid offsets.", __func__);
@@ -256,7 +257,7 @@ void GEKawaseBlurShaderFilter::SetBlurBuilderParam(Drawing::RuntimeShaderBuilder
     if (isUsingAF) {
         SkV2 offsets[BLUR_SAMPLE_COUNT];
         OffsetInfo offsetInfo = { offsetXY, offsetXY, scaledInfo.GetWidth(), scaledInfo.GetHeight() };
-        getNormalizedOffset(offsets, BLUR_SAMPLE_COUNT, offsetInfo);
+        GetNormalizedOffset(offsets, BLUR_SAMPLE_COUNT, offsetInfo);
         blurBuilder.SetUniform(
             "in_blurOffset", offsetInfo.offsetX, offsetInfo.offsetY, offsetInfo.width, offsetInfo.height);
     } else {

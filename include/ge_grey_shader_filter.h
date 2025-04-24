@@ -23,11 +23,11 @@ namespace Rosen {
 
 class GEGreyShaderFilter : public GEShaderFilter {
 public:
-    GEGreyShaderFilter(const Drawing::GEGreyShaderFilterParams& params);
+    GE_EXPORT GEGreyShaderFilter(const Drawing::GEGreyShaderFilterParams& params);
     ~GEGreyShaderFilter() override = default;
 
-    std::shared_ptr<Drawing::Image> ProcessImage(Drawing::Canvas& canvas, const std::shared_ptr<Drawing::Image> image,
-        const Drawing::Rect& src, const Drawing::Rect& dst) override;
+    GE_EXPORT std::shared_ptr<Drawing::Image> ProcessImage(Drawing::Canvas &canvas,
+        const std::shared_ptr<Drawing::Image> image, const Drawing::Rect &src, const Drawing::Rect &dst) override;
 
 private:
     bool InitGreyAdjustmentEffect();

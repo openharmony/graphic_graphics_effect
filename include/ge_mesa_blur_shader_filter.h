@@ -32,13 +32,13 @@ namespace OHOS {
 namespace Rosen {
 class GEMESABlurShaderFilter : public GEShaderFilter {
 public:
-    GEMESABlurShaderFilter(const Drawing::GEMESABlurShaderFilterParams& params);
+    GE_EXPORT GEMESABlurShaderFilter(const Drawing::GEMESABlurShaderFilterParams& params);
     ~GEMESABlurShaderFilter() override = default;
-    int GetRadius() const;
+    GE_EXPORT int GetRadius() const;
 
-    std::shared_ptr<Drawing::Image> ProcessImage(Drawing::Canvas& canvas, const std::shared_ptr<Drawing::Image> image,
-        const Drawing::Rect& src, const Drawing::Rect& dst) override;
-    static void SetMesaModeByCCM(int mode);
+    GE_EXPORT std::shared_ptr<Drawing::Image> ProcessImage(Drawing::Canvas &canvas,
+        const std::shared_ptr<Drawing::Image> image, const Drawing::Rect &src, const Drawing::Rect &dst) override;
+    static GE_EXPORT void SetMesaModeByCCM(int mode);
 
 protected:
     struct NewBlurParams {
@@ -62,32 +62,32 @@ protected:
         Drawing::RuntimeShaderBuilder& blurBuilder, Drawing::RuntimeShaderBuilder& simpleBuilder,
         const std::shared_ptr<Drawing::Image>& image, const std::shared_ptr<Drawing::Image>& input,
         const Drawing::ImageInfo& scaledInfo, const Drawing::SamplingOptions& linear, const NewBlurParams& blur) const;
-    std::shared_ptr<Drawing::ShaderEffect> DownSampling2X(Drawing::Canvas& canvas,
+    GE_EXPORT std::shared_ptr<Drawing::ShaderEffect> DownSampling2X(Drawing::Canvas& canvas,
         Drawing::RuntimeShaderBuilder& blurBuilder,
         const std::shared_ptr<Drawing::Image>& input, const Drawing::Rect& src,
         const Drawing::ImageInfo& scaledInfo, const Drawing::SamplingOptions& linear) const;
-    std::shared_ptr<Drawing::ShaderEffect> DownSampling4X(Drawing::Canvas& canvas,
+    GE_EXPORT std::shared_ptr<Drawing::ShaderEffect> DownSampling4X(Drawing::Canvas& canvas,
         Drawing::RuntimeShaderBuilder& blurBuilder, const std::shared_ptr<Drawing::Image>& input,
         const Drawing::Rect& src, const Drawing::ImageInfo& scaledInfo,
         const Drawing::SamplingOptions& linear, bool isEasySampling = false) const;
-    std::shared_ptr<Drawing::ShaderEffect> DownSampling8X(Drawing::Canvas& canvas,
+    GE_EXPORT std::shared_ptr<Drawing::ShaderEffect> DownSampling8X(Drawing::Canvas& canvas,
         Drawing::RuntimeShaderBuilder& blurBuilder,
         const std::shared_ptr<Drawing::Image>& input, const Drawing::Rect& src,
         const Drawing::ImageInfo& scaledInfo, const Drawing::ImageInfo& middleInfo,
         const Drawing::SamplingOptions& linear, bool isEasySampling = false) const;
-    std::shared_ptr<Drawing::ShaderEffect> DownSamplingMoreX(Drawing::Canvas& canvas,
+    GE_EXPORT std::shared_ptr<Drawing::ShaderEffect> DownSamplingMoreX(Drawing::Canvas& canvas,
         Drawing::RuntimeShaderBuilder& blurBuilder, const std::shared_ptr<Drawing::Image>& input,
         const Drawing::Rect& src, const Drawing::ImageInfo& scaledInfo,
         const Drawing::ImageInfo& middleInfo, const Drawing::ImageInfo& middleInfo2,
         const Drawing::SamplingOptions& linear, bool isEasySampling = false) const;
 
     virtual bool SetBlurParams(NewBlurParams& bParam);
-    bool SetGeneralBlurParams(NewBlurParams& bParam);
-    bool SetBlurParamsHelper(NewBlurParams& bParam,
+    GE_EXPORT bool SetGeneralBlurParams(NewBlurParams& bParam);
+    GE_EXPORT bool SetBlurParamsHelper(NewBlurParams& bParam,
         const std::vector<std::vector<float>>& offsetTable, float st, float ed);
 
     virtual Drawing::ImageInfo ComputeImageInfo(const Drawing::ImageInfo& originalInfo, int& width, int& height) const;
-    Drawing::Matrix BuildStretchMatrix(const Drawing::ImageInfo& scaledInfo,
+    GE_EXPORT Drawing::Matrix BuildStretchMatrix(const Drawing::ImageInfo& scaledInfo,
         const std::shared_ptr<Drawing::Image>& input) const;
 
     int radius_ = 0;
@@ -108,7 +108,7 @@ protected:
     Drawing::TileMode tileMode_ = Drawing::TileMode::CLAMP;
     float width_ = 0.0f;
     float height_ = 0.0f;
-    static int g_isSimpleX;
+    static GE_EXPORT int g_isSimpleX;
 
 private:
     bool InitBlurEffect();
@@ -128,7 +128,7 @@ private:
         const Drawing::ImageInfo& scaledInfo, const Drawing::SamplingOptions& linear,
         const Drawing::Matrix& matrix = Drawing::Matrix()) const;
 
-    std::shared_ptr<Drawing::Image> ScaleAndAddRandomColor(Drawing::Canvas& canvas,
+    GE_EXPORT std::shared_ptr<Drawing::Image> ScaleAndAddRandomColor(Drawing::Canvas& canvas,
         const std::shared_ptr<Drawing::Image>& image, const std::shared_ptr<Drawing::Image>& blurImage,
         const Drawing::Rect& src, const Drawing::Rect& dst, int& width, int& height) const;
 

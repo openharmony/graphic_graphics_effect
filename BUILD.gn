@@ -27,11 +27,13 @@ ohos_source_set("graphics_effect_src") {
     debug = false
   }
   cflags = [
+    "-Wall",
     "-O2",
     "-ftrapv",
     "-FPIC",
     "-FS",
     "-D_FORTIFY_SOURCE=2",
+    "-fvisibility=hidden",
     "-fdata-sections",
     "-ffunction-sections",
   ]
@@ -42,9 +44,10 @@ ohos_source_set("graphics_effect_src") {
     "-FPIC",
     "-FS",
     "-D_FORTIFY_SOURCE=2",
-    "-fvisibility-inlines-hidden",
     "-fdata-sections",
     "-ffunction-sections",
+    "-fvisibility=hidden",
+    "-fvisibility-inlines-hidden",
   ]
 
   public_configs = [ ":export_config" ]

@@ -16,6 +16,85 @@ import("//foundation/graphic/graphics_effect/config.gni")
 
 module_output_path = "graphics_effect/effect_process"
 
+group("unittest") {
+  testonly = true
+  deps = [ ":GraphicsEffectTest" ]
+}
+
+ohos_source_set("graphics_effect_test_src") {
+  cflags = [
+    "-O2",
+    "-ftrapv",
+    "-FPIC",
+    "-FS",
+    "-D_FORTIFY_SOURCE=2",
+    "-fdata-sections",
+    "-ffunction-sections",
+  ]
+  cflags_cc = [
+    "-std=c++17",
+    "-O2",
+    "-ftrapv",
+    "-FPIC",
+    "-FS",
+    "-D_FORTIFY_SOURCE=2",
+    "-fvisibility-inlines-hidden",
+    "-fdata-sections",
+    "-ffunction-sections",
+  ]
+
+  include_dirs = [ "${graphics_effect_root}/include" ]
+
+  sources = [
+    "${graphics_effect_root}/src/ext/gex_dot_matrix_shader.cpp",
+    "${graphics_effect_root}/src/ext/gex_flow_light_sweep_shader.cpp",
+    "${graphics_effect_root}/src/ext/gex_marshalling_helper.cpp",
+    "${graphics_effect_root}/src/ge_aibar_shader_filter.cpp",
+    "${graphics_effect_root}/src/ge_external_dynamic_loader.cpp",
+    "${graphics_effect_root}/src/ge_grey_shader_filter.cpp",
+    "${graphics_effect_root}/src/ge_kawase_blur_shader_filter.cpp",
+    "${graphics_effect_root}/src/ge_linear_gradient_blur_shader_filter.cpp",
+    "${graphics_effect_root}/src/ge_magnifier_shader_filter.cpp",
+    "${graphics_effect_root}/src/ge_mesa_blur_shader_filter.cpp",
+    "${graphics_effect_root}/src/ge_render.cpp",
+    "${graphics_effect_root}/src/ge_system_properties.cpp",
+    "${graphics_effect_root}/src/ge_visual_effect.cpp",
+    "${graphics_effect_root}/src/ge_visual_effect_container.cpp",
+    "${graphics_effect_root}/src/ge_visual_effect_impl.cpp",
+    "${graphics_effect_root}/src/ge_water_ripple_filter.cpp",
+  ]
+
+  external_deps = []
+  if (is_arkui_x) {
+    deps += [
+      "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_${target_os}",
+      "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
+      "//third_party/bounds_checking_function:libsec_static",
+      "//third_party/skia:skia_$target_os",
+    ]
+    external_deps += [ "hilog:libhilog" ]
+  } else {
+    external_deps += [
+      "bounds_checking_function:libsec_shared",
+      "graphic_2d:2d_graphics",
+      "hilog:libhilog",
+    ]
+  }
+
+  defines = []
+  if (current_os == "ohos") {
+    defines += [ "GE_OHOS" ]
+    external_deps += [ "init:libbegetutil" ]
+  }
+
+  if (ge_is_ohos || ge_is_linux) {
+    defines += [ "GE_PLATFORM_UNIX" ]
+  }
+
+  part_name = "graphics_effect"
+  subsystem_name = "graphic"
+}
+
 ohos_unittest("GraphicsEffectTest") {
   module_out_path = module_output_path
 
@@ -41,28 +120,21 @@ ohos_unittest("GraphicsEffectTest") {
     sources += [ "ge_external_dynamic_loader_test.cpp" ]
   }
 
-  include_dirs = [
-    "$graphics_effect_root/include",
-    "$graphics_effect_root/src",
-  ]
+  include_dirs = [ "$graphics_effect_root/include" ]
 
   cflags = [
     "-Dprivate=public",
     "-Dprotected=public",
   ]
 
+  public_deps = [ ":graphics_effect_test_src" ]
+
   external_deps = [
     "c_utils:utils",
     "graphic_2d:2d_graphics",
-    "graphics_effect:graphics_effect_core",
     "hilog:libhilog",
   ]
 
   part_name = "graphics_effect"
   subsystem_name = "graphic"
-}
-
-group("unittest") {
-  testonly = true
-  deps = [ ":GraphicsEffectTest" ]
 }

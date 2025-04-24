@@ -15,6 +15,8 @@
 #ifndef GRAPHICS_EFFECT_GE_EXTERNAL_DYNAMIC_LOADER_H
 #define GRAPHICS_EFFECT_GE_EXTERNAL_DYNAMIC_LOADER_H
 
+#include "ge_common.h"
+
 #include <cstdint>
 
 namespace OHOS {
@@ -25,9 +27,9 @@ public:
     GEExternalDynamicLoader operator=(const GEExternalDynamicLoader&) = delete;
     virtual ~GEExternalDynamicLoader();
 
-    static GEExternalDynamicLoader& GetInstance();
+    static GE_EXPORT GEExternalDynamicLoader& GetInstance();
 
-    void* CreateGEXObjectByType(uint32_t type, uint32_t len, void* param);
+    GE_EXPORT void* CreateGEXObjectByType(uint32_t type, uint32_t len, void* param);
 
 private:
     using CreateGEXObjectByTypeFunc = void* (*)(uint32_t, uint32_t, void*);
