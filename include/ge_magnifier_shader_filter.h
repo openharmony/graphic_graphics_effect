@@ -55,15 +55,15 @@ public:
 
 class GEMagnifierShaderFilter : public GEShaderFilter {
 public:
-    GEMagnifierShaderFilter(const Drawing::GEMagnifierShaderFilterParams& params);
+    GE_EXPORT GEMagnifierShaderFilter(const Drawing::GEMagnifierShaderFilterParams& params);
     GEMagnifierShaderFilter(const GEMagnifierShaderFilter&) = delete;
     GEMagnifierShaderFilter operator=(const GEMagnifierShaderFilter&) = delete;
     ~GEMagnifierShaderFilter() override = default;
 
-    std::shared_ptr<Drawing::Image> ProcessImage(Drawing::Canvas& canvas, const std::shared_ptr<Drawing::Image> image,
-        const Drawing::Rect& src, const Drawing::Rect& dst) override;
+    GE_EXPORT std::shared_ptr<Drawing::Image> ProcessImage(Drawing::Canvas &canvas,
+        const std::shared_ptr<Drawing::Image> image, const Drawing::Rect &src, const Drawing::Rect &dst) override;
 
-    const std::string GetDescription() const;
+    const GE_EXPORT std::string GetDescription() const;
 
 private:
     std::shared_ptr<Drawing::RuntimeShaderBuilder> MakeMagnifierShader(

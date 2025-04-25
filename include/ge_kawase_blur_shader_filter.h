@@ -30,29 +30,32 @@
 
 namespace OHOS {
 namespace Rosen {
+
+struct OffsetInfo;
+
 class GEKawaseBlurShaderFilter : public GEShaderFilter {
 public:
-    GEKawaseBlurShaderFilter(const Drawing::GEKawaseBlurShaderFilterParams& params);
+    GE_EXPORT GEKawaseBlurShaderFilter(const Drawing::GEKawaseBlurShaderFilterParams& params);
     ~GEKawaseBlurShaderFilter() override = default;
-    int GetRadius() const;
+    GE_EXPORT int GetRadius() const;
 
-    std::shared_ptr<Drawing::Image> ProcessImage(Drawing::Canvas& canvas, const std::shared_ptr<Drawing::Image> image,
-        const Drawing::Rect& src, const Drawing::Rect& dst) override;
+    GE_EXPORT std::shared_ptr<Drawing::Image> ProcessImage(Drawing::Canvas &canvas,
+        const std::shared_ptr<Drawing::Image> image, const Drawing::Rect &src, const Drawing::Rect &dst) override;
 
 private:
     static Drawing::Matrix GetShaderTransform(
         const Drawing::Canvas* canvas, const Drawing::Rect& blurRect, float scaleW = 1.0f, float scaleH = 1.0f);
     bool InitBlurEffect();
     bool InitMixEffect();
-    bool InitSimpleFilter();
+    GE_EXPORT bool InitSimpleFilter();
 
     bool InitBlurEffectForAdvancedFilter();
     void CheckInputImage(Drawing::Canvas& canvas, const std::shared_ptr<Drawing::Image>& image,
         std::shared_ptr<Drawing::Image>& checkedImage, const Drawing::Rect& src) const;
-    void OutputOriginalImage(Drawing::Canvas& canvas, const std::shared_ptr<Drawing::Image>& image,
+    GE_EXPORT void OutputOriginalImage(Drawing::Canvas& canvas, const std::shared_ptr<Drawing::Image>& image,
         const Drawing::Rect& src, const Drawing::Rect& dst) const;
 
-    std::shared_ptr<Drawing::Image> ScaleAndAddRandomColor(Drawing::Canvas& canvas,
+    GE_EXPORT std::shared_ptr<Drawing::Image> ScaleAndAddRandomColor(Drawing::Canvas& canvas,
         const std::shared_ptr<Drawing::Image>& image, const std::shared_ptr<Drawing::Image>& blurImage,
         const Drawing::Rect& src, const Drawing::Rect& dst, int& width, int& height) const;
     std::shared_ptr<Drawing::ShaderEffect> ApplySimpleFilter(Drawing::Canvas& canvas,
@@ -60,13 +63,15 @@ private:
         const Drawing::ImageInfo& scaledInfo, const Drawing::SamplingOptions& linear) const;
     void ComputeRadiusAndScale(int radius);
     void AdjustRadiusAndScale();
-    std::string GetDescription() const;
+    GE_EXPORT std::string GetDescription() const;
     void SetBlurBuilderParam(Drawing::RuntimeShaderBuilder& blurBuilder, const float offsetXY,
         const Drawing::ImageInfo& scaledInfo, const int width, const int height);
     bool IsInputValid(Drawing::Canvas& canvas, const std::shared_ptr<Drawing::Image>& image, const Drawing::Rect& src,
         const Drawing::Rect& dst);
     const OHOS::Rosen::Drawing::Matrix BuildMatrix(
-        const Drawing::Rect& src, const Drawing::ImageInfo& scaledInfo, const std::shared_ptr<Drawing::Image>& input);
+        const Drawing::Rect &src, const Drawing::ImageInfo &scaledInfo, const std::shared_ptr<Drawing::Image> &input);
+
+    static void GetNormalizedOffset(SkV2 *offsets, const uint32_t offsetCount, const OffsetInfo &offsetInfo);
 
     int radius_;
     float blurRadius_ = 0.0f;

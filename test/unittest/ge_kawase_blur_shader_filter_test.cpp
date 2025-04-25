@@ -16,14 +16,25 @@
 #include <gtest/gtest.h>
 
 #include "ge_kawase_blur_shader_filter.h"
+// #include "foundation/graphic/graphics_effect/src/ge_kawase_blur_shader_filter.cpp"
 
-#include "ge_kawase_blur_shader_filter.cpp"
 #include "draw/color.h"
 #include "image/bitmap.h"
 #include "image/image.h"
 
 using namespace testing;
 using namespace testing::ext;
+
+struct OHOS::Rosen::OffsetInfo {
+    float offsetX;
+    float offsetY;
+    int width;
+    int height;
+};
+
+namespace {
+constexpr uint32_t BLUR_SAMPLE_COUNT = 5;
+}
 
 namespace OHOS {
 namespace GraphicsEffectEngine {
@@ -534,7 +545,7 @@ HWTEST_F(GEKawaseBlurShaderFilterTest, getNormalizedOffset001, TestSize.Level1)
     SkV2 offsets[offsetCount];
     OffsetInfo offsetInfo = { 1.f, 1.f, 2, 2 }; // 1.f, 1.f, 2, 2 -> offsetx, offsety, width, height
 
-    getNormalizedOffset(offsets, offsetCount, offsetInfo);
+    GEKawaseBlurShaderFilter::GetNormalizedOffset(offsets, offsetCount, offsetInfo);
     EXPECT_TRUE(fabs(offsets[0].x - 0.f) < FLT_EPSILON); // 0.f init offset x
     EXPECT_TRUE(fabs(offsets[0].y - 0.f) < FLT_EPSILON); // 0.f init offset y
     EXPECT_TRUE(fabs(offsets[1].x - 0.5f) < FLT_EPSILON); // 0.5f offsetx/width
@@ -554,7 +565,7 @@ HWTEST_F(GEKawaseBlurShaderFilterTest, getNormalizedOffset002, TestSize.Level1)
     OffsetInfo offsetInfo = { 1.f, 1.f, 2, 2 }; // 1.f, 1.f, 2, 2 -> offsetx, offsety, width, height
     SkV2* offsets = nullptr;
     //offsets == nullptr
-    getNormalizedOffset(offsets, offsetCount, offsetInfo);
+    GEKawaseBlurShaderFilter::GetNormalizedOffset(offsets, offsetCount, offsetInfo);
     EXPECT_EQ(offsets, nullptr);
 }
 
@@ -571,7 +582,7 @@ HWTEST_F(GEKawaseBlurShaderFilterTest, getNormalizedOffset003, TestSize.Level1)
     SkV2 offsets[offsetCount] = { { 1.f, 1.f } }; // 1.f, 1.f init data: x, y
     OffsetInfo offsetInfo = { 1.f, 1.f, 2, 2 }; // 1.f, 1.f, 2, 2 -> offsetx, offsety, width, height
     //offsetCount != BLUR_SAMPLE_COUNT
-    getNormalizedOffset(offsets, offsetCount, offsetInfo);
+    GEKawaseBlurShaderFilter::GetNormalizedOffset(offsets, offsetCount, offsetInfo);
     EXPECT_TRUE(fabs(offsets[0].x - 1.f) < FLT_EPSILON); // 1.f no changed value
     EXPECT_TRUE(fabs(offsets[0].y - 1.f) < FLT_EPSILON); // 1.f no changed value
 }
@@ -591,7 +602,7 @@ HWTEST_F(GEKawaseBlurShaderFilterTest, getNormalizedOffset004, TestSize.Level1)
     offsets[0].y = 1.f; // 1.f, init data: y
     OffsetInfo offsetInfo = { 1.f, 1.f, 0, 2 }; // 1.f, 1.f, 0, 2 -> offsetx, offsety, width, height
     // offsetInfo.width=0
-    getNormalizedOffset(offsets, offsetCount, offsetInfo);
+    GEKawaseBlurShaderFilter::GetNormalizedOffset(offsets, offsetCount, offsetInfo);
     EXPECT_TRUE(fabs(offsets[0].x - 1.f) < FLT_EPSILON); // 1.f no changed value
     EXPECT_TRUE(fabs(offsets[0].y - 1.f) < FLT_EPSILON); // 1.f no changed value
 }
@@ -611,7 +622,7 @@ HWTEST_F(GEKawaseBlurShaderFilterTest, getNormalizedOffset005, TestSize.Level1)
     offsets[0].y = 1.f; // 1.f, init data: y
     OffsetInfo offsetInfo = { 1.f, 1.f, 2, 0 }; // 1.f, 1.f, 2, 0 -> offsetx, offsety, width, height
     // offsetInfo.height=0
-    getNormalizedOffset(offsets, offsetCount, offsetInfo);
+    GEKawaseBlurShaderFilter::GetNormalizedOffset(offsets, offsetCount, offsetInfo);
     EXPECT_TRUE(fabs(offsets[0].x - 1.f) < FLT_EPSILON); // 1.f no changed value
     EXPECT_TRUE(fabs(offsets[0].y - 1.f) < FLT_EPSILON); // 1.f no changed value
 }

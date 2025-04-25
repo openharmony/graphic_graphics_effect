@@ -15,6 +15,8 @@
 #ifndef GRAPHICS_EFFECT_GE_SYSTEM_PROPERTIES_H
 #define GRAPHICS_EFFECT_GE_SYSTEM_PROPERTIES_H
 
+#include "ge_common.h"
+
 #include <atomic>
 #include <cstdlib>
 #include <string>
@@ -35,7 +37,7 @@ public:
     ~GESystemProperties() = default;
 
     static std::string GetEventProperty(const std::string& paraName);
-    static bool GetBoolSystemProperty(const char* name, bool defaultValue);
+    static GE_EXPORT bool GetBoolSystemProperty(const char* name, bool defaultValue);
     static int ConvertToInt(const char* originValue, int defaultValue);
 
 private:
