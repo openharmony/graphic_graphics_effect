@@ -47,7 +47,6 @@ enum class GEFilterType : int32_t {
     // Shape
     SDF_UNION_OP,
     SDF_RRECT_SHAPE,
-    SDF_TRANSFORM_SHAPE,
     SDF_PIXELMAP_SHAPE,
     // Shader
     DOT_MATRIX,
