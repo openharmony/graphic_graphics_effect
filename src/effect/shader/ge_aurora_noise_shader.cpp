@@ -271,9 +271,6 @@ std::shared_ptr<Drawing::RuntimeShaderBuilder> GEAuroraNoiseShader::GetAuroraNoi
         static constexpr char prog[] = R"(
             uniform shader verticalBlurTexture;
             uniform vec2 iResolution;
-            uniform float noise;
-            uniform float freqX;
-            uniform float freqY;
 
             const float downSampleFactor = 8.0;
 
