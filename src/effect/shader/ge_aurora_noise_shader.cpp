@@ -23,19 +23,26 @@ namespace {
 static constexpr char AURORA_GENERATOR_PROG[] = R"(
     uniform vec2 iResolution;
     uniform float noise;
+    uniform float freqX;
+    uniform float freqY;
+
     const float contrast = 4.64; // contrast constant, 464.0 / 100.0
     const float brightness = -0.17647; // brightness constant, -45.0 / 255.0
-    const float downSampleFactor = 8.0;
+
     float SNoise(in vec3 v);
+
     vec4 main(vec2 fragCoord)
     {
         vec2 uv = fragCoord / iResolution.xy;
         float aspect = iResolution.x / iResolution.y;
         vec2 p = vec2((uv.x / 0.75 - 1.0) * aspect, (uv.y * 2.0 - 1.0)); // horizontal stretch and map uv
+
         float innerFreqX = 2.0 * freqX;
         float innerFreqY = mix(2.0 * freqY, freqY, smoothstep(1.0, 0.0, uv.y));
         vec2 dom = vec2(p.x * innerFreqX, p.y * innerFreqY);
+
         float n = abs(SNoise(vec3(dom, noise * 3.0)));
+
         float alpha = clamp(1.0 - (n * contrast + brightness), 0.0, 1.0);
         return vec4(alpha);
     }
