@@ -2510,6 +2510,12 @@ void GEVisualEffectImpl::SetAuroraNoiseParams(const std::string& tag, float para
     if (tag == GE_SHADER_AURORA_NOISE_VALUE) {
         auroNoiseParams_->noise_ = param;
     }
+    if (tag == GE_SHADER_AURORA_FREQX_VALUE) {
+        auroNoiseParams_->freqX_ = std::clamp(param, 0.1f, 5.0f);
+    }
+    if (tag == GE_SHADER_AURORA_FREQY_VALUE) {
+        auroNoiseParams_->freqY_ = std::clamp(param, 0.1f, 5.0f);
+    }
 }
 
 void GEVisualEffectImpl::SetParticleCircularHaloParams(const std::string& tag, const std::pair<float, float>& param)
