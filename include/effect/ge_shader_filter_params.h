@@ -617,8 +617,12 @@ REGISTER_GEFILTERPARAM_TYPEINFO(WAVY_RIPPLE_LIGHT, GEWavyRippleLightShaderParams
 // Declare same with in rs_render_shader_base.h
 constexpr char GE_SHADER_AURORA_NOISE[] = "AuroraNoise";
 constexpr char GE_SHADER_AURORA_NOISE_VALUE[] = "AuroraNoise_Noise";
+constexpr char GE_SHADER_AURORA_FREQX_VALUE[] = "AuroraNoise_FreqX";
+constexpr char GE_SHADER_AURORA_FREQY_VALUE[] = "AuroraNoise_FreqY"; 
 struct GEAuroraNoiseShaderParams {
     float noise_ = 0.f;
+    float freqX_ = 1.0f;
+    float freqY_ = 1.0f;
 };
 REGISTER_GEFILTERPARAM_TYPEINFO(AURORA_NOISE, GEAuroraNoiseShaderParams, GE_SHADER_AURORA_NOISE);
 
