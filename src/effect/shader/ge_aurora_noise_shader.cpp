@@ -123,37 +123,39 @@ static constexpr char AURORA_GENERATOR_PROG[] = R"(
 static constexpr char AURORA_VERT_BLUR_PROG[] = R"(
     uniform shader auroraNoiseTexture;
     uniform vec2 iResolution;
-    const int maxSampleCount = 8.0;
 
-    int CalculateDynamicSamples(float inDist, float maxDist)
-    {
-        float t = clamp(max(inDist, 0.0) / maxDist), 0.0, 1.0);
+    const int maxSampleCount = 20;
+
+    int CalculateDynamicSamples(float inDist, float maxDist) {
+        float t = clamp(max(inDist, 0.0) / maxDist, 0.0, 1.0);
         float samples = mix(1.0, float(maxSampleCount), smoothstep(0.0, 1.0, t));
         return int(samples);
     }
 
     vec4 main(vec2 fragCoord)
     {
-        vec2 tileSize = iResolution.xy / downSampleFactor;
-        vec2 localXY = mod(fragCoord, tileSize);
-        if (floor(fragCoord.x / tileSize.x) > 0.5 || floor(fragCoord.y / tileSize.y) > 0.5) {
-            return vec4(0.0);
-        }
-        vec2 uv = (localXY + 0.5) / tileSize;
+        vec2 uv = fragCoord / iResolution.xy;
         float dist = 1.2 - uv.y; // 1.2: origin height of the vertical blur
         float blurRadius = mix(0.0, 0.3, smoothstep(0.0, 1.2, dist)); // 0.3: blur radius on top, 1.2: origin
+
         vec4 col = vec4(0.0);
         float totalWeight = 0.0;
-        for (int i = 0; i < sampleCount; ++i) {
+        int sampleCount = CalculateDynamicSamples(dist, 1.2); // 1.2: max sample distance
+        for (int i = 0; i < maxSampleCount; ++i) {
+            if (i >= sampleCount) {
+                break;
+            }
             float s = float(i) / float(sampleCount);
             vec2 offset = vec2(0.0, s * blurRadius);
             vec2 sampleUV = uv + offset;
+
             sampleUV = clamp(sampleUV, vec2(0.0), vec2(1.0));
             vec2 sampleCoord = sampleUV * iResolution.xy;
             float weight = 1.0 - abs(s);
-            col += SampleWholeTile(sampleCoord, iResolution.xy) * weight;
+            col += auroraNoiseTexture.eval(sampleCoord) * weight;
             totalWeight += weight;
         }
+
         return col / totalWeight;
     }
 )";
