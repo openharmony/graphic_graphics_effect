@@ -175,7 +175,7 @@ void GEAuroraNoiseShader::MakeDrawingShader(const Drawing::Rect& rect, float pro
 
 void GEAuroraNoiseShader::Preprocess(Drawing::Canvas& canvas, const Drawing::Rect& rect)
 {
-    Drawing::Rect dsRect {0.0f, 0.0f, 0.125f * rect.GetWidth(), 0.125f * rect.GetHeight()}; //0.125: 8 x downSample
+    Drawing::Rect dsRect {0.0f, 0.0f, 0.125f * rect.GetWidth(), 0.125f * rect.GetHeight()}; // 0.125: 8 x downSample
     Drawing::ImageInfo downSampledImg(std::ceil(dsRect.GetWidth()), dsRect.GetHeight(),
         Drawing::ColorType::COLORTYPE_RGBA_8888, Drawing::AlphaType::ALPHATYPE_OPAQUE);
     noiseImg_ = MakeAuroraNoiseGeneratorShader(canvas, downSampledImg);
