@@ -15,34 +15,11 @@
 
 #include "ge_log.h"
 #include "ge_sdf_transform_shader_shape.h"
-#include "ge_sdf_cascade_manager.h"
 #include "ge_trace.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace Drawing {
-bool GESDFTransformShaderShape::GenerateCascadeShaderHasNormal(
-    GESDFCascadeManager& manager, float width, float height) const
-{
-    if (!params_.shape) {
-        return false;
-    }
-    Drawing::Matrix invertMatrix = Drawing::Matrix();
-    if (!params_.matrix.Invert(invertMatrix)) {
-        invertMatrix = params_.matrix;
-    }
-    // Inversed matrix need change multiplication order
-    invertMatrix.PreConcat(this->GetTransMatrix());
-    params_.shape->SetTransMatrix(invertMatrix);
-    bool shapeResult = params_.shape->GenerateCascadeShaderHasNormal(manager, width, height);
-    if (!shapeResult) {
-        return false;
-    }
-    // Passing transformed shape name when union
-    this->SetUniformIndex(params_.shape->GetUniformIndex());
-    return true;
-}
-
 std::shared_ptr<ShaderEffect> GESDFTransformShaderShape::GenerateDrawingShader(float width, float height) const
 {
     GE_TRACE_NAME_FMT("GESDFTransformShaderShape::GenerateDrawingShader, Width: %g, Height: %g", width, height);
@@ -71,18 +48,18 @@ std::shared_ptr<ShaderEffect> GESDFTransformShaderShape::GenerateDrawingShaderHa
     if (!params_.shape) {
         return nullptr;
     }
-    GESDFCascadeManager manager;
-    Drawing::Matrix invertMatrix = Drawing::Matrix();
-    if (!params_.matrix.Invert(invertMatrix)) {
-        invertMatrix = params_.matrix;
-    }
-    params_.shape->SetTransMatrix(invertMatrix);
-    bool shapeResult = params_.shape->GenerateCascadeShaderHasNormal(manager, width, height);
-    if (!shapeResult) {
+    std::shared_ptr<Drawing::RuntimeShaderBuilder> builder = GetSDFTransformShaderHasNormalShapeBuilder();
+    if (!builder) {
+        LOGE("GESDFTransformShaderShape::GenerateDrawingShaderHasNormal has builder error");
         return nullptr;
     }
-    manager.AppendReturnCall(params_.shape->GetUniformIndex());
-    return manager.GenerateShaderEffectOnePass();
+    auto shapeShader = params_.shape->GenerateDrawingShaderHasNormal(width, height);
+    if (!shapeShader) {
+        LOGE("GESDFTransformShaderShape::GenerateDrawingShaderHasNormal has empty shader");
+        return nullptr;
+    }
+    auto sdfTransformShapeShader = GenerateShaderEffect(width, height, shapeShader, builder);
+    return sdfTransformShapeShader;
 }
 
 std::shared_ptr<Drawing::RuntimeShaderBuilder> GESDFTransformShaderShape::GetSDFTransformShaderShapeBuilder() const
