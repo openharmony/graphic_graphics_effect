@@ -23,24 +23,26 @@ namespace {
 static constexpr char AURORA_GENERATOR_PROG[] = R"(
     uniform vec2 iResolution;
     uniform float noise;
+    uniform float freqX;
+    uniform float freqY;
+
     const float contrast = 4.64; // contrast constant, 464.0 / 100.0
     const float brightness = -0.17647; // brightness constant, -45.0 / 255.0
-    const float downSampleFactor = 8.0;
+
     float SNoise(in vec3 v);
+
     vec4 main(vec2 fragCoord)
     {
-        vec2 tileSize = iResolution.xy / downSampleFactor;
-        vec2 localXY = mod(fragCoord, tileSize);
-        if (floor(fragCoord.x / tileSize.x) > 0.5 || floor(fragCoord.y / tileSize.y) > 0.5) {
-            return vec4(0.0);
-        }
-        vec2 uv = (localXY + 0.5) / tileSize;
+        vec2 uv = fragCoord / iResolution.xy;
         float aspect = iResolution.x / iResolution.y;
         vec2 p = vec2((uv.x / 0.75 - 1.0) * aspect, (uv.y * 2.0 - 1.0)); // horizontal stretch and map uv
-        float freqX = 2.0;
-        float freqY = mix(freqX, freqX * 0.5, smoothstep(1.0, 0.0, uv.y));
-        vec2 dom = vec2(p.x * freqX, p.y * freqY);
+
+        float innerFreqX = 2.0 * freqX;
+        float innerFreqY = mix(2.0 * freqY, freqY, smoothstep(1.0, 0.0, uv.y));
+        vec2 dom = vec2(p.x * innerFreqX, p.y * innerFreqY);
+
         float n = abs(SNoise(vec3(dom, noise * 3.0)));
+
         float alpha = clamp(1.0 - (n * contrast + brightness), 0.0, 1.0);
         return vec4(alpha);
     }
@@ -121,39 +123,39 @@ static constexpr char AURORA_GENERATOR_PROG[] = R"(
 static constexpr char AURORA_VERT_BLUR_PROG[] = R"(
     uniform shader auroraNoiseTexture;
     uniform vec2 iResolution;
-    const float downSampleFactor = 8.0;
-    const int sampleCount = 20;
 
-    vec4 SampleWholeTile(vec2 fragCoord, vec2 res)
-    {
-        vec2 tileSize = res / downSampleFactor;
-        vec2 uvInTile = fragCoord / res;
-        vec2 pixel = uvInTile * (tileSize - 1.0);
-        return auroraNoiseTexture.eval(pixel + 0.5);
+    const int maxSampleCount = 20;
+
+    int CalculateDynamicSamples(float inDist, float maxDist) {
+        float t = clamp(max(inDist, 0.0) / maxDist, 0.0, 1.0);
+        float samples = mix(1.0, float(maxSampleCount), smoothstep(0.0, 1.0, t));
+        return int(samples);
     }
 
     vec4 main(vec2 fragCoord)
     {
-        vec2 tileSize = iResolution.xy / downSampleFactor;
-        vec2 localXY = mod(fragCoord, tileSize);
-        if (floor(fragCoord.x / tileSize.x) > 0.5 || floor(fragCoord.y / tileSize.y) > 0.5) {
-            return vec4(0.0);
-        }
-        vec2 uv = (localXY + 0.5) / tileSize;
+        vec2 uv = fragCoord / iResolution.xy;
         float dist = 1.2 - uv.y; // 1.2: origin height of the vertical blur
         float blurRadius = mix(0.0, 0.3, smoothstep(0.0, 1.2, dist)); // 0.3: blur radius on top, 1.2: origin
+
         vec4 col = vec4(0.0);
         float totalWeight = 0.0;
-        for (int i = 0; i < sampleCount; ++i) {
+        int sampleCount = CalculateDynamicSamples(dist, 1.2); // 1.2: max sample distance
+        for (int i = 0; i < maxSampleCount; ++i) {
+            if (i >= sampleCount) {
+                break;
+            }
             float s = float(i) / float(sampleCount);
             vec2 offset = vec2(0.0, s * blurRadius);
             vec2 sampleUV = uv + offset;
+
             sampleUV = clamp(sampleUV, vec2(0.0), vec2(1.0));
             vec2 sampleCoord = sampleUV * iResolution.xy;
             float weight = 1.0 - abs(s);
-            col += SampleWholeTile(sampleCoord, iResolution.xy) * weight;
+            col += auroraNoiseTexture.eval(sampleCoord) * weight;
             totalWeight += weight;
         }
+
         return col / totalWeight;
     }
 )";
@@ -173,10 +175,11 @@ void GEAuroraNoiseShader::MakeDrawingShader(const Drawing::Rect& rect, float pro
 
 void GEAuroraNoiseShader::Preprocess(Drawing::Canvas& canvas, const Drawing::Rect& rect)
 {
-    Drawing::ImageInfo downSampledImg(rect.GetWidth(), rect.GetHeight(),
+    Drawing::Rect dsRect {0.0f, 0.0f, 0.125f * rect.GetWidth(), 0.125f * rect.GetHeight()}; // 0.125: 8 x downSample
+    Drawing::ImageInfo downSampledImg(std::ceil(dsRect.GetWidth()), dsRect.GetHeight(),
         Drawing::ColorType::COLORTYPE_RGBA_8888, Drawing::AlphaType::ALPHATYPE_OPAQUE);
     noiseImg_ = MakeAuroraNoiseGeneratorShader(canvas, downSampledImg);
-    Drawing::ImageInfo verticalBlurImgInf(rect.GetWidth(), rect.GetHeight(),
+    Drawing::ImageInfo verticalBlurImgInf(dsRect.GetWidth(), dsRect.GetHeight(),
         Drawing::ColorType::COLORTYPE_RGBA_8888, Drawing::AlphaType::ALPHATYPE_OPAQUE);
     verticalBlurImg_ = MakeAuroraNoiseVerticalBlurShader(canvas, verticalBlurImgInf);
 }
@@ -193,6 +196,8 @@ std::shared_ptr<Drawing::Image> GEAuroraNoiseShader::MakeAuroraNoiseGeneratorSha
     }
     builder_->SetUniform("iResolution", width, height);
     builder_->SetUniform("noise", auroraNoiseParams_.noise_);
+    builder_->SetUniform("freqX", auroraNoiseParams_.freqX_);
+    builder_->SetUniform("freqY", auroraNoiseParams_.freqY_);
     auto auroraNoiseGeneratorShader = builder_->MakeImage(canvas.GetGPUContext().get(), nullptr, imageInfo, false);
     if (auroraNoiseGeneratorShader == nullptr) {
         GE_LOGE("GEAuroraNoiseShader auroraNoiseGeneratorShader is nullptr.");
@@ -271,10 +276,7 @@ std::shared_ptr<Drawing::RuntimeShaderBuilder> GEAuroraNoiseShader::GetAuroraNoi
 
             vec4 main(vec2 fragCoord)
             {
-                vec2 tileSize = iResolution.xy / downSampleFactor;
-                vec2 uvInTile = fragCoord / iResolution.xy;
-                vec2 pixel = uvInTile * (tileSize - 1.0);
-                return verticalBlurTexture.eval(pixel + 0.5);
+                return verticalBlurTexture.eval(fragCoord / downSampleFactor);
             }
         )";
         auroraNoiseUpSamplingShaderEffect_ = Drawing::RuntimeEffect::CreateForShader(prog);
