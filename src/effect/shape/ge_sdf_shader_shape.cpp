@@ -25,11 +25,6 @@ namespace OHOS {
 namespace Rosen {
 namespace Drawing {
 
-bool GESDFShaderShape::GenerateCascadeShaderHasNormal(GESDFCascadeManager& manager, float width, float height) const
-{
-    return false;
-}
-
 std::shared_ptr<ShaderEffect> GESDFShaderShape::GenerateDrawingShader(float width, float height) const
 {
     return nullptr;
