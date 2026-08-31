@@ -68,7 +68,8 @@ static bool IsAdvancedFilterUsable()
 static bool GetBlurExtraFilterEnabled()
 {
     static bool blurExtraFilterEnabled =
-        (std::atoi(GESystemProperties::GetEventProperty(PROPERTY_BLUR_EXTRA_FILTER).c_str()) != 0);
+        (GESystemProperties::ConvertToInt(
+            GESystemProperties::GetEventProperty(PROPERTY_BLUR_EXTRA_FILTER).c_str(), 0) != 0);
     return blurExtraFilterEnabled;
 }
 
@@ -76,7 +77,8 @@ static bool GetKawaseOriginalEnabled()
 {
 #ifdef GE_OHOS
     static bool kawaseOriginalEnabled =
-        (std::atoi(GESystemProperties::GetEventProperty(PROPERTY_KAWASE_ORIGINAL_IMAGE).c_str()) != 0);
+        (GESystemProperties::ConvertToInt(
+            GESystemProperties::GetEventProperty(PROPERTY_KAWASE_ORIGINAL_IMAGE).c_str(), 0) != 0);
     return kawaseOriginalEnabled;
 #else
     return false;

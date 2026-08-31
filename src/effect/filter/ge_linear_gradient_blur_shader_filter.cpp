@@ -32,7 +32,8 @@ static bool GetMaskLinearBlurEnabled()
     // Determine whether the mask LinearBlur render should be enabled. The default value is 0,
     // which means that it is unenabled.
     static bool enabled =
-        std::atoi((system::GetParameter("persist.sys.graphic.maskLinearBlurEnabled", "1")).c_str()) != 0;
+        GESystemProperties::ConvertToInt(
+            system::GetParameter("persist.sys.graphic.maskLinearBlurEnabled", "1").c_str(), 1) != 0;
     return enabled;
 #else
     return false;
