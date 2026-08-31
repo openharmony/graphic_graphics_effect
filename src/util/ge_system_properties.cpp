@@ -15,6 +15,9 @@
 
 #include "ge_system_properties.h"
 
+#include "ge_log.h"
+#include "parse_persist_int32.h"
+
 namespace OHOS {
 namespace Rosen {
 
@@ -41,7 +44,15 @@ bool GESystemProperties::GetBoolSystemProperty(const char* name, bool defaultVal
 
 int GESystemProperties::ConvertToInt(const char* originValue, int defaultValue)
 {
-    return originValue == nullptr ? defaultValue : std::atoi(originValue);
+    if (originValue == nullptr) {
+        return defaultValue;
+    }
+    int32_t value = 0;
+    if (!ParsePersistInt32(originValue, value)) {
+        LOGE("invalid persist int: %{public}s", originValue);
+        return defaultValue;
+    }
+    return value;
 }
 
 } // namespace Rosen

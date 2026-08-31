@@ -29,8 +29,8 @@ namespace Rosen {
 #define PROPERTY_KAWASE_ORIGINAL_IMAGE "persist.sys.graphic.kawaseOriginalEnable"
 #define PROPERTY_SIMPLIFIED_MESA_ENABLED "persist.sys.graphic.simplifiedMesaEnable"
 #ifdef GE_OHOS
-int GEMESABlurShaderFilter::g_isSimpleX = (std::atoi(
-    GESystemProperties::GetEventProperty(PROPERTY_SIMPLIFIED_MESA_ENABLED).c_str()));
+int GEMESABlurShaderFilter::g_isSimpleX = (GESystemProperties::ConvertToInt(
+    GESystemProperties::GetEventProperty(PROPERTY_SIMPLIFIED_MESA_ENABLED).c_str(), 0));
 #else
 int GEMESABlurShaderFilter::g_isSimpleX = 0;
 #endif
@@ -96,7 +96,8 @@ static bool GetKawaseOriginalEnabled()
 {
 #ifdef GE_OHOS
     static bool kawaseOriginalEnabled =
-        (std::atoi(GESystemProperties::GetEventProperty(PROPERTY_KAWASE_ORIGINAL_IMAGE).c_str()) != 0);
+        (GESystemProperties::ConvertToInt(
+            GESystemProperties::GetEventProperty(PROPERTY_KAWASE_ORIGINAL_IMAGE).c_str(), 0) != 0);
     return kawaseOriginalEnabled;
 #else
     return false;

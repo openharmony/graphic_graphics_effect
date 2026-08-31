@@ -57,7 +57,8 @@ static bool GetHpsEffectEnabled()
 #ifdef GE_OHOS
     // Determine whether the hps effect render should be enabled.
     static bool enabled =
-        std::atoi((system::GetParameter("persist.sys.graphic.hpsEffectEnabled", "1")).c_str()) != 0;
+        GESystemProperties::ConvertToInt(
+            system::GetParameter("persist.sys.graphic.hpsEffectEnabled", "1").c_str(), 1) != 0;
     return enabled;
 #else
     return false;

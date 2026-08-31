@@ -59,7 +59,8 @@ static bool IsShaderDiagnosticsEnabled()
 #ifdef GE_OHOS
     constexpr const char* PROPERTY_SHADER_DIAGNOSTICS_ENABLED = "persist.sys.graphic.geShaderDiagnosticsEnabled";
     static bool enabled =
-        (std::atoi(GESystemProperties::GetEventProperty(PROPERTY_SHADER_DIAGNOSTICS_ENABLED).c_str()) != 0);
+        (GESystemProperties::ConvertToInt(
+            GESystemProperties::GetEventProperty(PROPERTY_SHADER_DIAGNOSTICS_ENABLED).c_str(), 0) != 0);
     return enabled;
 #else
     return false;
