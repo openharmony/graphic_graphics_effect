@@ -27,7 +27,6 @@ namespace Drawing {
 constexpr float HALF = 0.5;
 constexpr float EXTEND = 0.5; // Fixing edge difference between SDF and Skia RRect
 constexpr float MIN_SIZE = 0.0001f;
-constexpr float EPSILON = 1e-6f;
 static constexpr char SDF_GRAD_PROG[] = R"(
     uniform vec2 centerPos;
     uniform vec2 halfSize;
@@ -271,34 +270,16 @@ GESDFRRectShaderShape::CornerRadii GESDFRRectShaderShape::ResolveCornerRadii(flo
 {
     CornerRadii radii {};
     CornerRadii rawRadii {};
+    float maxRadius = std::min(halfWidth, halfHeight);
     for (uint32_t index = 0; index < GERRect::CORNER_COUNT; ++index) {
         rawRadii[index] = params_.rrect.radius_[index];
-        radii[index].x_ = ClampCornerRadius(params_.rrect.radius_[index].x_ + EXTEND, halfWidth);
-        radii[index].y_ = ClampCornerRadius(params_.rrect.radius_[index].y_ + EXTEND, halfHeight);
-    }
-    float width = halfWidth * 2.0f;
-    float height = halfHeight * 2.0f;
-
-    float scaleX = 1.0f;
-    scaleX = std::min(scaleX, width / std::max(radii[GERRect::TOP_LEFT].x_ + radii[GERRect::TOP_RIGHT].x_, EPSILON));
-    scaleX = std::min(scaleX,
-        width / std::max(radii[GERRect::BOTTOM_LEFT].x_ + radii[GERRect::BOTTOM_RIGHT].x_, EPSILON));
-
-    float scaleY = 1.0f;
-    scaleY = std::min(scaleY,
-        height / std::max(radii[GERRect::TOP_LEFT].y_ + radii[GERRect::BOTTOM_LEFT].y_, EPSILON));
-    scaleY = std::min(scaleY,
-        height / std::max(radii[GERRect::TOP_RIGHT].y_ + radii[GERRect::BOTTOM_RIGHT].y_, EPSILON));
-    if (scaleX < 1.0f || scaleY < 1.0f) {
-        for (uint32_t index = 0; index < GERRect::CORNER_COUNT; ++index) {
-            radii[index].x_ *= scaleX;
-            radii[index].y_ *= scaleY;
-        }
+        radii[index].x_ = ClampCornerRadius(params_.rrect.radius_[index].x_ + EXTEND, maxRadius);
+        radii[index].y_ = ClampCornerRadius(params_.rrect.radius_[index].y_ + EXTEND, maxRadius);
     }
     LOGD("GESDFRRectShaderShape::ResolveCornerRadii raw=%{public}s resolved=%{public}s halfSize=(%{public}.2f,"
-        "%{public}.2f) scaleX=%{public}.4f scaleY=%{public}.4f",
+        "%{public}.2f) maxRadius=%{public}.4f",
         RadiiToString(rawRadii.data()).c_str(), RadiiToString(radii.data()).c_str(), halfWidth, halfHeight,
-        scaleX, scaleY);
+        maxRadius);
     return radii;
 }
 
