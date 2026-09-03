@@ -46,6 +46,8 @@ public:
     }
 
     static bool IsSDFCacheEnabled(bool defaultValue);
+private:
+    static int SDFCacheSystemFlag_;
 };
 } // OHOS::Rosen
 #endif // GRAPHICS_EFFECT_SHADER_CACHE_HELPER_H
