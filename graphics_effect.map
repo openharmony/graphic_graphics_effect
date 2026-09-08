@@ -1,0 +1,33 @@
+{
+    global:
+      extern "C++" {
+        /* all symbol started with GE, namespace OHOS::Rosen */
+        OHOS::Rosen::GE*;
+        OHOS::Rosen::GE*::*;
+        /* all symbol started with GE, namespace OHOS::Rosen::Drawing */
+        OHOS::Rosen::Drawing::GE*;
+        OHOS::Rosen::Drawing::GE*::*;
+        /* pipeline, namespace GraphicsEffectEngine */
+        OHOS::GraphicsEffectEngine::*;
+        /* hps */
+        OHOS::Rosen::Hps*;
+        OHOS::Rosen::Hps*::*;
+        /* util */
+        OHOS::Rosen::PerspectiveTransformCalculator::*;
+        /* GE_EXPORT func which not start with GE */
+        OHOS::Rosen::FrostedGlass*;
+        OHOS::Rosen::FrostedGlass*::*;
+        OHOS::Rosen::SpatialGlassEffect*;
+        OHOS::Rosen::SpatialGlassEffect*::*;
+
+        /* CFI Cross-DSO Support */
+        *vtable*for*OHOS*Rosen*;
+        *typeinfo*for*OHOS*Rosen*;
+        *VTT*for*OHOS*Rosen*;
+        *vtable*for*OHOS*GraphicsEffectEngine*;
+        *typeinfo*for*OHOS*GraphicsEffectEngine*;
+        *VTT*for*OHOS*GraphicsEffectEngine*;
+      };
+    local:
+      *;
+};
