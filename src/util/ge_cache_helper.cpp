@@ -17,20 +17,21 @@
 #include "ge_system_properties.h"
 
 namespace OHOS::Rosen {
+
+#ifdef GE_OHOS
+int GECacheHelper::SDFCacheSystemFlag_ = OHOS::system::GetIntParameter("persist.sys.graphic.effect.enablesdfcache", -1);
+#else
+int GECacheHelper::SDFCacheSystemFlag_ = -1;
+#endif
+
 bool GECacheHelper::IsSDFCacheEnabled(bool defaultValue)
 {
-#ifdef GE_OHOS
-    // if -1, return the defaultValue; else if 0 force false, else if 1 force true
-    static CachedHandle g_Handle = CachedParameterCreate("persist.sys.graphic.effect.enablesdfcache", "-1");
-    int changed = 0;
-    const char* enable = CachedParameterGetChanged(g_Handle, &changed);
-    auto readValue = GESystemProperties::ConvertToInt(enable, -1);
-    if (readValue == -1) {
+    // SDFCacheSystemFlag_ < 0, keep the defaultValue;
+    // SDFCacheSystemFlag_ = 0，force false;
+    // SDFCacheSystemFlag_ > 0，force true;
+    if (SDFCacheSystemFlag_ < 0) {
         return defaultValue;
     }
-    return readValue > 0;
-#else
-    return defaultValue;
-#endif
+    return SDFCacheSystemFlag_ > 0;
 }
 } // OHOS::Rosen

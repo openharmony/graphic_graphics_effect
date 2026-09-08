@@ -36,8 +36,6 @@ public:
     void TearDown() override;
     const std::string enableSDFTag_ = "persist.sys.graphic.effect.enablesdfcache";
     const std::string keepDefaultValue_ = "-1";
-    const std::string forceFalseValue_ = "0";
-    const std::string forceTrueValue_ = "1";
 };
 
 void GECacheHelperTest::SetUpTestCase(void) {}
@@ -53,51 +51,81 @@ void GECacheHelperTest::TearDown()
 }
 
 /**
- * @tc.name: IsSDFCacheEnabledDefault
- * @tc.desc: Verify IsSDFCacheEnabled returns defaultValue true when system property is not set
+ * @tc.name: IsSDFCacheEnabled_NegativeFlagWithTrueDefault
+ * @tc.desc: Verify IsSDFCacheEnabled returns defaultValue(true) when SDFCacheSystemFlag < 0
  * @tc.type: FUNC
  */
-HWTEST_F(GECacheHelperTest, IsSDFCacheEnabledDefault, TestSize.Level1)
+HWTEST_F(GECacheHelperTest, IsSDFCacheEnabled_NegativeFlagWithTrueDefault, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "GECacheHelperTest IsSDFCacheEnabledDefault start";
-    system::SetParameter(enableSDFTag_.c_str(), keepDefaultValue_.c_str());
-    bool result = GECacheHelper::IsSDFCacheEnabled(true);
-    EXPECT_TRUE(result);
-    result = GECacheHelper::IsSDFCacheEnabled(false);
-    EXPECT_FALSE(result);
-    GTEST_LOG_(INFO) << "GECacheHelperTest IsSDFCacheEnabledDefault end";
+    int originalFlag = GECacheHelper::SDFCacheSystemFlag_;
+    GECacheHelper::SDFCacheSystemFlag_ = -1;
+    EXPECT_TRUE(GECacheHelper::IsSDFCacheEnabled(true));
+    GECacheHelper::SDFCacheSystemFlag_ = originalFlag;
 }
 
 /**
- * @tc.name: IsSDFCacheEnabledForceFalse
- * @tc.desc: Verify IsSDFCacheEnabled returns defaultValue false when system property is not set
+ * @tc.name: IsSDFCacheEnabled_NegativeFlagWithFalseDefault
+ * @tc.desc: Verify IsSDFCacheEnabled returns defaultValue(false) when SDFCacheSystemFlag_ < 0
  * @tc.type: FUNC
  */
-HWTEST_F(GECacheHelperTest, IsSDFCacheEnabledForceFalse, TestSize.Level1)
+HWTEST_F(GECacheHelperTest, IsSDFCacheEnabled_NegativeFlagWithFalseDefault, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "GECacheHelperTest IsSDFCacheEnabledForceFalse start";
-    system::SetParameter(enableSDFTag_.c_str(), forceFalseValue_.c_str());
-    bool result = GECacheHelper::IsSDFCacheEnabled(false);
-    EXPECT_FALSE(result);
-    result = GECacheHelper::IsSDFCacheEnabled(true);
-    EXPECT_FALSE(result);
-    GTEST_LOG_(INFO) << "GECacheHelperTest IsSDFCacheEnabledForceFalse end";
+    int originalFlag = GECacheHelper::SDFCacheSystemFlag_;
+    GECacheHelper::SDFCacheSystemFlag_ = -1;
+    EXPECT_FALSE(GECacheHelper::IsSDFCacheEnabled(false));
+    GECacheHelper::SDFCacheSystemFlag_ = originalFlag;
 }
 
 /**
- * @tc.name: IsSDFCacheEnabledForceTrue
- * @tc.desc: Verify IsSDFCacheEnabled returns defaultValue false when system property is not set
+ * @tc.name: IsSDFCacheEnabled_ZeroFlagWithTrueDefault
+ * @tc.desc: Verify IsSDFCacheEnabled forces false when SDFCacheSystemFlag_ == 0 and defaultValue is true
  * @tc.type: FUNC
  */
-HWTEST_F(GECacheHelperTest, IsSDFCacheEnabledForceTrue, TestSize.Level1)
+HWTEST_F(GECacheHelperTest, IsSDFCacheEnabled_ZeroFlagWithTrueDefault, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "GECacheHelperTest IsSDFCacheEnabledForceTrue start";
-    system::SetParameter(enableSDFTag_.c_str(), forceTrueValue_.c_str());
-    bool result = GECacheHelper::IsSDFCacheEnabled(false);
-    EXPECT_TRUE(result);
-    result = GECacheHelper::IsSDFCacheEnabled(true);
-    EXPECT_TRUE(result);
-    GTEST_LOG_(INFO) << "GECacheHelperTest IsSDFCacheEnabledForceTrue end";
+    int originalFlag = GECacheHelper::SDFCacheSystemFlag_;
+    GECacheHelper::SDFCacheSystemFlag_ = 0;
+    EXPECT_FALSE(GECacheHelper::IsSDFCacheEnabled(true));
+    GECacheHelper::SDFCacheSystemFlag_ = originalFlag;
+}
+
+/**
+ * @tc.name: IsSDFCacheEnabled_ZeroFlagWithFalseDefault
+ * @tc.desc: Verify IsSDFCacheEnabled forces false when SDFCacheSystemFlag_ == 0 and defaultValue is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(GECacheHelperTest, IsSDFCacheEnabled_ZeroFlagWithFalseDefault, TestSize.Level1)
+{
+    int originalFlag = GECacheHelper::SDFCacheSystemFlag_;
+    GECacheHelper::SDFCacheSystemFlag_ = 0;
+    EXPECT_FALSE(GECacheHelper::IsSDFCacheEnabled(false));
+    GECacheHelper::SDFCacheSystemFlag_ = originalFlag;
+}
+
+/**
+ * @tc.name: IsSDFCacheEnabled_PositiveFlagWithTrueDefault
+ * @tc.desc: Verify IsSDFCacheEnabled forces true when SDFCacheSystemFlag_ > 0 and defaultValue is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(GECacheHelperTest, IsSDFCacheEnabled_PositiveFlagWithTrueDefault, TestSize.Level1)
+{
+    int originalFlag = GECacheHelper::SDFCacheSystemFlag_;
+    GECacheHelper::SDFCacheSystemFlag_ = 1;
+    EXPECT_TRUE(GECacheHelper::IsSDFCacheEnabled(true));
+    GECacheHelper::SDFCacheSystemFlag_ = originalFlag;
+}
+
+/**
+ * @tc.name: IsSDFCacheEnabled_PositiveFlagWithFalseDefault
+ * @tc.desc: Verify IsSDFCacheEnabled forces true when SDFCacheSystemFlag_ > 0 and defaultValue is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(GECacheHelperTest, IsSDFCacheEnabled_PositiveFlagWithFalseDefault, TestSize.Level1)
+{
+    int originalFlag = GECacheHelper::SDFCacheSystemFlag_;
+    GECacheHelper::SDFCacheSystemFlag_ = 1;
+    EXPECT_TRUE(GECacheHelper::IsSDFCacheEnabled(false));
+    GECacheHelper::SDFCacheSystemFlag_ = originalFlag;
 }
 } // namespace Rosen
 } // namespace OHOS
