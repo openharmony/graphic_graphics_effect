@@ -273,7 +273,7 @@ GESDFRRectShaderShape::CornerRadii GESDFRRectShaderShape::ResolveCornerRadii(flo
     float maxRadius = std::min(halfWidth, halfHeight);
     for (uint32_t index = 0; index < GERRect::CORNER_COUNT; ++index) {
         rawRadii[index] = params_.rrect.radius_[index];
-        // Upstream UX currently supports circular corner radii only, not elliptical corner radii.
+        // Currently supports circular corner radii only, not elliptical corner radii.
         radii[index].x_ = ClampCornerRadius(params_.rrect.radius_[index].x_ + EXTEND, maxRadius);
         radii[index].y_ = ClampCornerRadius(params_.rrect.radius_[index].y_ + EXTEND, maxRadius);
     }
