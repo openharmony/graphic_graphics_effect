@@ -409,7 +409,7 @@ HWTEST_F(GESDFRRectShaderShapeTest, GenerateShaderEffect_002, TestSize.Level1)
 
 /**
  * @tc.name: ResolveCornerRadii_001
- * @tc.desc: Verify oversized per-corner radii are normalized to fit the rect
+ * @tc.desc: Verify oversized per-corner radii are clamped to maxRadius independently
  * @tc.type: FUNC
  */
 HWTEST_F(GESDFRRectShaderShapeTest, ResolveCornerRadii_001, TestSize.Level1)
@@ -424,12 +424,138 @@ HWTEST_F(GESDFRRectShaderShapeTest, ResolveCornerRadii_001, TestSize.Level1)
 
     GESDFRRectShaderShape shape(param);
     auto radii = shape.ResolveCornerRadii(50.0f + 0.5f, 30.0f + 0.5f);
+    // maxRadius = min(50.5, 30.5) = 30.5
     EXPECT_LE(radii[GERRect::TOP_LEFT].x_ + radii[GERRect::TOP_RIGHT].x_, 101.0f);
     EXPECT_LE(radii[GERRect::BOTTOM_LEFT].x_ + radii[GERRect::BOTTOM_RIGHT].x_, 101.0f);
     EXPECT_LE(radii[GERRect::TOP_LEFT].y_ + radii[GERRect::BOTTOM_LEFT].y_, 61.0f);
     EXPECT_LE(radii[GERRect::TOP_RIGHT].y_ + radii[GERRect::BOTTOM_RIGHT].y_, 61.0f);
-    EXPECT_GT(radii[GERRect::TOP_LEFT].x_, radii[GERRect::TOP_LEFT].y_);
+    // Circular corners (rx == ry before overflow) keep circular after clamp
+    EXPECT_FLOAT_EQ(radii[GERRect::TOP_LEFT].x_, radii[GERRect::TOP_LEFT].y_);
+    EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_RIGHT].x_, radii[GERRect::BOTTOM_RIGHT].y_);
     GTEST_LOG_(INFO) << "GESDFRRectShaderShapeTest ResolveCornerRadii_001 end";
+}
+
+/**
+ * @tc.name: ResolveCornerRadiiNegativeRadius
+ * @tc.desc: Verify negative radius components are clamped to zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(GESDFRRectShaderShapeTest, ResolveCornerRadiiNegativeRadius, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GESDFRRectShaderShapeTest ResolveCornerRadiiNegativeRadius start";
+    GESDFRRectShapeParams param;
+    param.rrect = {0.0f, 0.0f, 100.0f, 100.0f};
+    param.rrect.radius_[GERRect::TOP_LEFT] = Vector2f(-10.0f, -5.0f);
+    param.rrect.radius_[GERRect::TOP_RIGHT] = Vector2f(-3.0f, 10.0f);
+    param.rrect.radius_[GERRect::BOTTOM_RIGHT] = Vector2f(10.0f, -20.0f);
+    param.rrect.radius_[GERRect::BOTTOM_LEFT] = Vector2f(0.0f, 0.0f);
+
+    GESDFRRectShaderShape shape(param);
+    auto radii = shape.ResolveCornerRadii(50.0f + 0.5f, 50.0f + 0.5f);
+    // Negative + EXTEND < 0 → clamped to 0
+    EXPECT_FLOAT_EQ(radii[GERRect::TOP_LEFT].x_, 0.0f);
+    EXPECT_FLOAT_EQ(radii[GERRect::TOP_LEFT].y_, 0.0f);
+    EXPECT_FLOAT_EQ(radii[GERRect::TOP_RIGHT].x_, 0.0f);
+    EXPECT_FLOAT_EQ(radii[GERRect::TOP_RIGHT].y_, 10.5f);
+    EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_RIGHT].x_, 10.5f);
+    EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_RIGHT].y_, 0.0f);
+    EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_LEFT].x_, 0.5f);
+    EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_LEFT].y_, 0.5f);
+    GTEST_LOG_(INFO) << "GESDFRRectShaderShapeTest ResolveCornerRadiiNegativeRadius end";
+}
+
+/**
+ * @tc.name: ResolveCornerRadiiSingleComponentOverflow
+ * @tc.desc: Verify only the overflowing component is clamped, others remain unchanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(GESDFRRectShaderShapeTest, ResolveCornerRadiiSingleComponentOverflow, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GESDFRRectShaderShapeTest ResolveCornerRadiiSingleComponentOverflow start";
+    GESDFRRectShapeParams param;
+    param.rrect = {0.0f, 0.0f, 100.0f, 60.0f};
+    // Only TOP_LEFT.x overflows; all other components are within bounds
+    param.rrect.radius_[GERRect::TOP_LEFT] = Vector2f(80.0f, 10.0f);
+    param.rrect.radius_[GERRect::TOP_RIGHT] = Vector2f(10.0f, 10.0f);
+    param.rrect.radius_[GERRect::BOTTOM_RIGHT] = Vector2f(15.0f, 15.0f);
+    param.rrect.radius_[GERRect::BOTTOM_LEFT] = Vector2f(5.0f, 5.0f);
+
+    GESDFRRectShaderShape shape(param);
+    auto radii = shape.ResolveCornerRadii(50.0f + 0.5f, 30.0f + 0.5f);
+    // maxRadius = min(50.5, 30.5) = 30.5
+    EXPECT_FLOAT_EQ(radii[GERRect::TOP_LEFT].x_, 30.5f);
+    EXPECT_FLOAT_EQ(radii[GERRect::TOP_LEFT].y_, 10.5f);
+    // Unaffected corners keep their value + EXTEND
+    EXPECT_FLOAT_EQ(radii[GERRect::TOP_RIGHT].x_, 10.5f);
+    EXPECT_FLOAT_EQ(radii[GERRect::TOP_RIGHT].y_, 10.5f);
+    EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_RIGHT].x_, 15.5f);
+    EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_RIGHT].y_, 15.5f);
+    EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_LEFT].x_, 5.5f);
+    EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_LEFT].y_, 5.5f);
+    GTEST_LOG_(INFO) << "GESDFRRectShaderShapeTest ResolveCornerRadiiSingleComponentOverflow end";
+}
+
+/**
+ * @tc.name: ResolveCornerRadiiMultiCornerIndependentClamp
+ * @tc.desc: Verify each corner is independently clamped to maxRadius without cross-corner scaling
+ * @tc.type: FUNC
+ */
+HWTEST_F(GESDFRRectShaderShapeTest, ResolveCornerRadiiMultiCornerIndependentClamp, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GESDFRRectShaderShapeTest ResolveCornerRadiiMultiCornerIndependentClamp start";
+    GESDFRRectShapeParams param;
+    param.rrect = {0.0f, 0.0f, 100.0f, 100.0f};
+    // maxRadius = 50.5; different corners overflow on different axes
+    param.rrect.radius_[GERRect::TOP_LEFT] = Vector2f(60.0f, 60.0f);
+    param.rrect.radius_[GERRect::TOP_RIGHT] = Vector2f(30.0f, 70.0f);
+    param.rrect.radius_[GERRect::BOTTOM_RIGHT] = Vector2f(80.0f, 40.0f);
+    param.rrect.radius_[GERRect::BOTTOM_LEFT] = Vector2f(20.0f, 20.0f);
+
+    GESDFRRectShaderShape shape(param);
+    auto radii = shape.ResolveCornerRadii(50.0f + 0.5f, 50.0f + 0.5f);
+    // Each corner clamped independently to [0, 50.5]
+    EXPECT_FLOAT_EQ(radii[GERRect::TOP_LEFT].x_, 50.5f);
+    EXPECT_FLOAT_EQ(radii[GERRect::TOP_LEFT].y_, 50.5f);
+    EXPECT_FLOAT_EQ(radii[GERRect::TOP_RIGHT].x_, 30.5f);
+    EXPECT_FLOAT_EQ(radii[GERRect::TOP_RIGHT].y_, 50.5f);
+    EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_RIGHT].x_, 50.5f);
+    EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_RIGHT].y_, 40.5f);
+    // BOTTOM_LEFT within bounds, unaffected by other corners' overflow
+    EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_LEFT].x_, 20.5f);
+    EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_LEFT].y_, 20.5f);
+    GTEST_LOG_(INFO) << "GESDFRRectShaderShapeTest ResolveCornerRadiiMultiCornerIndependentClamp end";
+}
+
+/**
+ * @tc.name: ResolveCornerRadiiCircularPreservation
+ * @tc.desc: Verify circular corners (rx == ry) stay circular after clamping to maxRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(GESDFRRectShaderShapeTest, ResolveCornerRadiiCircularPreservation, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GESDFRRectShaderShapeTest ResolveCornerRadiiCircularPreservation start";
+    GESDFRRectShapeParams param;
+    param.rrect = {0.0f, 0.0f, 100.0f, 60.0f};
+    // All corners are circular (rx == ry); three overflow, one does not
+    param.rrect.radius_[GERRect::TOP_LEFT] = Vector2f(60.0f, 60.0f);
+    param.rrect.radius_[GERRect::TOP_RIGHT] = Vector2f(40.0f, 40.0f);
+    param.rrect.radius_[GERRect::BOTTOM_RIGHT] = Vector2f(50.0f, 50.0f);
+    param.rrect.radius_[GERRect::BOTTOM_LEFT] = Vector2f(20.0f, 20.0f);
+
+    GESDFRRectShaderShape shape(param);
+    auto radii = shape.ResolveCornerRadii(50.0f + 0.5f, 30.0f + 0.5f);
+    // maxRadius = 30.5; circular corners remain circular after independent clamp
+    EXPECT_FLOAT_EQ(radii[GERRect::TOP_LEFT].x_, radii[GERRect::TOP_LEFT].y_);
+    EXPECT_FLOAT_EQ(radii[GERRect::TOP_RIGHT].x_, radii[GERRect::TOP_RIGHT].y_);
+    EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_RIGHT].x_, radii[GERRect::BOTTOM_RIGHT].y_);
+    EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_LEFT].x_, radii[GERRect::BOTTOM_LEFT].y_);
+    // Overflowing circular corners clamp to maxRadius
+    EXPECT_FLOAT_EQ(radii[GERRect::TOP_LEFT].x_, 30.5f);
+    EXPECT_FLOAT_EQ(radii[GERRect::TOP_RIGHT].x_, 30.5f);
+    EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_RIGHT].x_, 30.5f);
+    // Non-overflowing corner keeps its value + EXTEND
+    EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_LEFT].x_, 20.5f);
+    GTEST_LOG_(INFO) << "GESDFRRectShaderShapeTest ResolveCornerRadiiCircularPreservation end";
 }
 
 /**
