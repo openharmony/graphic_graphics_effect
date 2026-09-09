@@ -275,7 +275,7 @@ GESDFRRectShaderShape::CornerRadii GESDFRRectShaderShape::ResolveCornerRadii(flo
         rawRadii[index] = params_.rrect.radius_[index];
         // Currently supports circular corner radii only, not elliptical corner radii.
         radii[index].x_ = ClampCornerRadius(params_.rrect.radius_[index].x_ + EXTEND, maxRadius);
-        radii[index].y_ = ClampCornerRadius(params_.rrect.radius_[index].y_ + EXTEND, maxRadius);
+        radii[index].y_ = radii[index].x_;
     }
     LOGD("GESDFRRectShaderShape::ResolveCornerRadii raw=%{public}s resolved=%{public}s halfSize=(%{public}.2f,"
         "%{public}.2f) maxRadius=%{public}.4f",
