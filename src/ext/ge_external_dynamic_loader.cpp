@@ -55,6 +55,7 @@ GEExternalDynamicLoader::GEExternalDynamicLoader()
 
     destroyObjectFunc_ = (DestroyGEXObjectFunc)dlsym(libHandle_, GRAPHICS_EFFECT_EXT_DESTROY_INREFACE.c_str());
     if (!destroyObjectFunc_) {
+        createObjectFunc_ = nullptr;
         dlclose(libHandle_);
         libHandle_ = nullptr;
         LOGE("GEExternalDynamicLoader DestroyObjectFunc is null");
@@ -107,19 +108,11 @@ bool GEExternalDynamicLoader::DestroyGEXObject(void* ptr)
         LOGD("GEExternalDynamicLoader::DestroyGEXObject interface is null");
         return false;
     }
-#ifdef GE_OHOS
-    auto enable = system::GetBoolParameter(GRAPHICS_EFFECT_EXT_ENABLE, true);
-    if (enable) {
-        destroyObjectFunc_(ptr);
+    if (ptr == nullptr) {
         return true;
     }
-
-    LOGW("GEExternalDynamicLoader::DestroyGEXObject dynamic load disabled");
-    return false;
-#else
     destroyObjectFunc_(ptr);
     return true;
-#endif
 }
 
 } // namespace Rosen
