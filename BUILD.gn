@@ -49,6 +49,8 @@ ohos_source_set("graphics_effect_src") {
     "-fvisibility=hidden",
     "-fdata-sections",
     "-ffunction-sections",
+    "-fno-asynchronous-unwind-tables",
+    "-fno-unwind-tables",
   ]
   cflags_cc = [
     "-std=c++17",
@@ -61,6 +63,8 @@ ohos_source_set("graphics_effect_src") {
     "-ffunction-sections",
     "-fvisibility=hidden",
     "-fvisibility-inlines-hidden",
+    "-fno-asynchronous-unwind-tables",
+    "-fno-unwind-tables",
   ]
 
   public_configs = [ ":export_config" ]
@@ -262,6 +266,10 @@ if (is_arkui_x) {
       "bounds_checking_function:libsec_shared",
       "hilog:libhilog",
     ]
+
+    if (ge_is_ohos || ge_is_linux) {
+      version_script = "graphics_effect.map"
+    }
 
     output_name = "graphics_effect"
     part_name = "graphics_effect"
