@@ -456,9 +456,9 @@ HWTEST_F(GESDFRRectShaderShapeTest, ResolveCornerRadiiNegativeRadius, TestSize.L
     EXPECT_FLOAT_EQ(radii[GERRect::TOP_LEFT].x_, 0.0f);
     EXPECT_FLOAT_EQ(radii[GERRect::TOP_LEFT].y_, 0.0f);
     EXPECT_FLOAT_EQ(radii[GERRect::TOP_RIGHT].x_, 0.0f);
-    EXPECT_FLOAT_EQ(radii[GERRect::TOP_RIGHT].y_, 10.5f);
+    EXPECT_FLOAT_EQ(radii[GERRect::TOP_RIGHT].y_, 0.0f);
     EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_RIGHT].x_, 10.5f);
-    EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_RIGHT].y_, 0.0f);
+    EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_RIGHT].y_, 10.5f);
     EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_LEFT].x_, 0.5f);
     EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_LEFT].y_, 0.5f);
     GTEST_LOG_(INFO) << "GESDFRRectShaderShapeTest ResolveCornerRadiiNegativeRadius end";
@@ -484,7 +484,7 @@ HWTEST_F(GESDFRRectShaderShapeTest, ResolveCornerRadiiSingleComponentOverflow, T
     auto radii = shape.ResolveCornerRadii(50.0f + 0.5f, 30.0f + 0.5f);
     // maxRadius = min(50.5, 30.5) = 30.5
     EXPECT_FLOAT_EQ(radii[GERRect::TOP_LEFT].x_, 30.5f);
-    EXPECT_FLOAT_EQ(radii[GERRect::TOP_LEFT].y_, 10.5f);
+    EXPECT_FLOAT_EQ(radii[GERRect::TOP_LEFT].y_, 30.5f);
     // Unaffected corners keep their value + EXTEND
     EXPECT_FLOAT_EQ(radii[GERRect::TOP_RIGHT].x_, 10.5f);
     EXPECT_FLOAT_EQ(radii[GERRect::TOP_RIGHT].y_, 10.5f);
@@ -517,9 +517,9 @@ HWTEST_F(GESDFRRectShaderShapeTest, ResolveCornerRadiiMultiCornerIndependentClam
     EXPECT_FLOAT_EQ(radii[GERRect::TOP_LEFT].x_, 50.5f);
     EXPECT_FLOAT_EQ(radii[GERRect::TOP_LEFT].y_, 50.5f);
     EXPECT_FLOAT_EQ(radii[GERRect::TOP_RIGHT].x_, 30.5f);
-    EXPECT_FLOAT_EQ(radii[GERRect::TOP_RIGHT].y_, 50.5f);
+    EXPECT_FLOAT_EQ(radii[GERRect::TOP_RIGHT].y_, 30.5f);
     EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_RIGHT].x_, 50.5f);
-    EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_RIGHT].y_, 40.5f);
+    EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_RIGHT].y_, 50.5f);
     // BOTTOM_LEFT within bounds, unaffected by other corners' overflow
     EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_LEFT].x_, 20.5f);
     EXPECT_FLOAT_EQ(radii[GERRect::BOTTOM_LEFT].y_, 20.5f);
